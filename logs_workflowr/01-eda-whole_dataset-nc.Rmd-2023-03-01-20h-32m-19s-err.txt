@@ -1,0 +1,9 @@
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+System has not been booted with systemd as init system (PID 1). Can't operate.
+Failed to connect to bus: Host is down
+Error in Merge_Sparse_Data_All(matrix_list = raw_data_list, add_cell_ids = names(raw_data_list)) : 
+  Supplied `add_cell_ids` will result in overlapping barcodes names if
+provided cell prefixes/suffixes are not unique.
+ℹ Please change and re-run.

@@ -1,0 +1,6 @@
+# HSTS 1.0 Known Hosts database for GNU Wget.
+# Edit at your own risk.
+# <hostname>	<port>	<incl. subdomains>	<created>	<max-age>
+umd.box.com	0	0	1678105130	31536000
+dl2.boxcloud.com	0	0	1678105132	31536000
+umd.app.box.com	0	0	1678105131	31536000

@@ -1,0 +1,372 @@
+---
+title: "Differential expression analysis between sex of Hypothalamus astrocytes dataset from Romanov RA et al 2020"
+author: "Evgenii O. Tretiakov"
+date: "`r Sys.Date()`"
+format:
+  html:
+    toc: true
+    df-print: paged
+    code-fold: true
+    fig-width: 9
+    fig-height: 12
+    fig-format: retina
+    fig-responsive: true
+    fig-dpi: 600
+execute:
+  keep-md: false
+  echo: true
+  error: false
+  message: false
+  warning: false
+  debug: false
+knitr:
+  opts_chunk:
+    autodep: true
+    fig.align: center
+    fig.retina: 2
+    fig.width: 14
+    fig.height: 12
+---
+
+```{r setup, include = FALSE}
+DOCNAME <- "de-astrocytes-between-sex-across-regions-on-dataset-from-romanov2020"
+NOW <- Sys.time()
+
+# Time chunks during knitting
+knitr::knit_hooks$set(timeit = function(before) {
+  if (before) {
+    print(paste("Start:", Sys.time()))
+    NOW <<- Sys.time()
+  } else {
+    print(paste("Stop:", Sys.time()))
+    print(Sys.time() - NOW)
+  }
+})
+
+knitr::knit_hooks$set(debug = function(before, options, envir) {
+  if (!before) {
+    message(
+      paste(names(envir), as.list(envir),
+        sep = " = ", collapse = "\n"
+      )
+    )
+  }
+})
+
+knitr::opts_chunk$set(
+  cache          = FALSE,
+  dev            = c("png", "pdf"),
+  timeit         = TRUE
+)
+```
+
+## Load data and setup parameters
+
+```{r libraries, cache=FALSE}
+# Load tidyverse infrastructure packages
+suppressPackageStartupMessages({
+  library(future)
+  library(here)
+  library(tidyverse)
+  library(magrittr)
+  library(stringr)
+  library(skimr)
+  library(RColorBrewer)
+  library(viridis)
+})
+
+
+# Load packages for scRNA-seq analysis and visualisation
+suppressPackageStartupMessages({
+  library(ggplot2)
+  library(cowplot)
+  library(patchwork)
+  library(ggstatsplot)
+  library(anndata)
+  library(sceasy)
+  library(Seurat)
+  library(SeuratDisk)
+  library(SeuratWrappers)
+  library(scCustomize)
+})
+
+sc <- import("scanpy", convert = FALSE)
+```
+
+### Set paths
+
+```{r paths}
+src_dir <- here("code")
+data_dir <- here("../data")
+output_dir <- here("output")
+plots_dir <- here(output_dir, "figures")
+tables_dir <- here(output_dir, "tables")
+```
+
+### Load helper functions and gene-sets
+
+```{r source, cache = FALSE}
+source(here(src_dir, "genes.R"))
+source(here(src_dir, "functions.R"))
+```
+
+### Set fixed variables
+
+```{r params-computation, cache = FALSE}
+# set seed
+reseed <- 42
+set.seed(seed = reseed)
+
+# Parameters for parallel execution
+n_cores <- 32
+plan("multisession", workers = n_cores)
+options(
+  future.globals.maxSize = 100000 * 1024^2,
+  future.rng.onMisuse = "ignore"
+)
+plan()
+
+
+# ggplot2 theme
+theme_set(ggmin::theme_powerpoint())
+```
+
+```{r params}
+bioproject <- "PRJNA548917"
+project <- "romanov2020_Hypoth-dev"
+cb_fpr <- 0.001
+low_cutoff_gene <- 500
+high_cutoff_gene <- NULL
+high_cutoff_gene <- 6000
+low_cutoff_umis <- NULL
+low_cutoff_umis <- -Inf
+high_cutoff_umis <- 20000
+high_cutoff_pc_mt <- 15
+high_cutoff_pc_ribo <- 15
+high_cutoff_pc_hb <- 0.1
+high_cutoff_doublet_score <- 0.33
+high_cutoff_complexity <- 0.85
+connectivity_model <- "min_tree"
+k <- 10
+metric <- "euclidean"
+signature <- 100
+```
+
+## Load predicted astrocytes data and subset from Romanov RA et al 2020
+
+```{r load-seurat}
+srt_path <- here(
+  data_dir,
+  sprintf("resolved_subregions_by_microclusters/best_xgboost-subregional_%s-astrocytes_dataset-msp_%s-metric_%s-k_%s-sign_%s-amb_%s.h5Seurat", bioproject, connectivity_model, metric, k, signature, cb_fpr)
+)
+srt <- LoadH5Seurat(file = srt_path)
+Idents(srt) <- "predict_xgboost_subregion"
+print(srt)
+```
+
+```{r normalize}
+srt <- NormalizeData(srt)
+srt <- FindVariableFeatures(srt, selection.method = "vst", nfeatures = 3000)
+all.genes <- rownames(srt)
+srt <- ScaleData(srt, features = all.genes)
+```
+
+
+```{r get-scores}
+# Create sex-related gene sets
+male_genes <- c("Eif2s3y", "Ddx3y", "Uty", "Kdm5d", "Zfy", "Rps4y1", "Rps4y2", "Sry") %>% .[. %in% rownames(srt)]
+female_genes <- c("Tsix", "Xist") %>% .[. %in% rownames(srt)]
+
+# Add module scores for male and female gene sets
+srt <- AddModuleScore(
+  srt,
+  features = male_genes,
+  name = "Male_score"
+)
+
+srt <- AddModuleScore(
+  srt,
+  features = female_genes,
+  name = "Female_score"
+)
+```
+
+```{r sex-featureplots, fig.width=14, fig.height=6}
+FeaturePlot_scCustom(reduction = "densmap_xgboost",
+  na_cutoff = NA,
+  pt.size = 4,
+  order = TRUE,
+  alpha_na_exp = 0.1,
+  alpha_exp = 0.35,
+  seurat_object = srt,
+  features = c("Male_score1", "Female_score1"),
+  colors_use = srt@misc$expr_Colour_Pal
+)
+```
+
+```{r check-females}
+classes <- levels(srt)
+
+female_cells <-
+  classes %>%
+  map(~ quantile(subset(srt, ident = .x)$Female_score1, 0.8))
+female_cells <- simplify(female_cells)
+female_cells
+```
+
+```{r check-males}
+male_cells <-
+  classes %>%
+  map(~ quantile(subset(srt, ident = .x)$Male_score1, 0.8))
+male_cells <- simplify(male_cells)
+male_cells
+```
+
+```{r assign-females}
+female_cells <- WhichCells(
+  object = srt,
+  expression = Female_score1 >= quantile(srt$Female_score1, 0.8)
+)
+Idents(object = srt, cells = female_cells) <- "female"
+```
+
+```{r assign-males}
+male_cells <- WhichCells(
+  object = srt,
+  expression = Male_score1 >= quantile(srt$Male_score1, 0.8)
+)
+Idents(object = srt, cells = male_cells) <- "male"
+```
+
+```{r subset}
+srt <- subset(x = srt, idents = c("female", "male"))
+srt$sex <- Idents(srt)
+```
+
+```{r sex-featureplots-cacybp, fig.width=7, fig.height=27}
+FeaturePlot_scCustom(reduction = "densmap_xgboost",
+  na_cutoff = NA,
+  pt.size = 4,
+  order = TRUE,
+  alpha_na_exp = 0.1,
+  alpha_exp = 0.35,
+  seurat_object = srt,
+  features = c(
+    "Cacybp", "S100a6", "S100a1",
+    "S100a12", "S100b", "S100p",
+    "S100a4", "S100a2", "S100a3") %>%
+    .[. %in% rownames(srt)],
+  split.by = "sex",
+  colors_use = srt@misc$expr_Colour_Pal
+)
+```
+
+```{r find-marker-genes}
+# Run differential expression analysis between sexes
+dimred_de <-
+  classes %>%
+  map(~ FindMarkers(
+    srt,
+    ident.1 = "female",
+    ident.2 = "male",
+    min.pct = 0.15,
+    logfc.threshold = 0.25,
+    test.use = "MAST",
+    only.pos = TRUE
+  ) %>%
+    rownames_to_column("gene") %>%
+    mutate(cluster = .x))
+dimred_de <- reduce(dimred_de, bind_rows)
+
+# Save differentially expressed genes
+write_csv(dimred_de, here(data_dir, sprintf("resolved_subregions_by_microclusters/%s-male_vs_female-de_genes.csv", bioproject)))
+
+Idents(srt) <- "predict_xgboost_subregion"
+
+all_markers_genes <- dimred_de %>%
+  arrange(desc(avg_log2FC)) %>%
+  distinct(gene, .keep_all = TRUE) %>%
+  group_by(cluster)
+all_markers_genes2 <- all_markers_genes %>%
+  filter(gene %in% c(npr, nmr, genes.embed, transcription_factors)) %>%
+  group_by(cluster) %>%
+  arrange(desc(avg_log2FC))
+
+top_5 <- all_markers_genes %>%
+  group_by(cluster) %>%
+  arrange(desc(avg_log2FC)) %>%
+  slice_head(n = 5) %>%
+  .$gene
+top_30 <- all_markers_genes %>%
+  group_by(cluster) %>%
+  arrange(desc(avg_log2FC)) %>%
+  slice_head(n = 30) %>%
+  .$gene
+top_5s <- all_markers_genes2 %>%
+  group_by(cluster) %>%
+  arrange(desc(avg_log2FC)) %>%
+  slice_head(n = 5) %>%
+  .$gene
+top_30s <- all_markers_genes2 %>%
+  group_by(cluster) %>%
+  arrange(desc(avg_log2FC)) %>%
+  slice_head(n = 30) %>%
+  .$gene
+
+top_5
+top_30
+top_5s
+top_30s
+```
+
+```{r plt-dotplot-gene, fig.width=14, fig.height=7}
+DotPlot(object = srt, features = top_30, split.by = "sex") + RotatedAxis()
+```
+
+```{r plt-dotplot-sgenes, fig.width=14, fig.height=7}
+DotPlot(object = srt, features = top_30s, split.by = "sex") + RotatedAxis()
+```
+
+```{r plt-dotplot-cacybp, fig.width=8, fig.height=9}
+DotPlot(
+  object = srt,
+  features = c(
+    "Cacybp", "S100a6", "S100a1",
+    "S100a12", "S100b", "S100p",
+    "S100a4", "S100a2", "S100a3"
+  ) %>%
+    .[. %in% rownames(srt)],
+  split.by = "sex"
+) + RotatedAxis()
+```
+
+```{r save-markers-featureplots-genes}
+Iterate_FeaturePlot_scCustom(reduction = "densmap_xgboost",
+  na_cutoff = NA,
+  pt.size = 4,
+  order = TRUE,
+  alpha_na_exp = 0.1,
+  alpha_exp = 0.75, seurat_object = srt, gene_list = top_30, single_pdf = FALSE, file_path = plots_dir, file_type=".pdf", file_name = sprintf("%s.pdf", bioproject), colors_use = srt@misc$expr_Colour_Pal
+)
+```
+
+```{r plt-dotplot-dendrogram-genes-npr, fig.width=16, fig.height=9}
+DotPlot(object = srt, features = npr[npr %in% rownames(srt)], split.by = "sex") + RotatedAxis()
+```
+
+```{r plt-dotplot-dendrogram-genes-nmr, fig.width=22, fig.height=6}
+DotPlot(object = srt, features = nmr[nmr %in% rownames(srt)], split.by = "sex") + RotatedAxis()
+```
+
+```{r plt-dotplot-dendrogram-genes-adgen, fig.width=21, fig.height=9}
+DotPlot(object = srt, features = genes.embed[genes.embed %in% rownames(srt)], split.by = "sex") + RotatedAxis()
+```
+
+
+## Session information
+
+```{r session-info, cache = FALSE}
+sI <- sessioninfo::session_info()
+sI$loadedOnly <- NULL
+print(sI, locale = FALSE)
+```

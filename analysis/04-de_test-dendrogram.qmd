@@ -1,0 +1,600 @@
+---
+title: "Differential expression analysis of Hypothalamus astrocytes dataset from Romanov RA et al 2020"
+author: "Evgenii O. Tretiakov"
+date: "`r Sys.Date()`"
+format:
+  html:
+    toc: true
+    df-print: paged
+    code-fold: true
+    fig-width: 9
+    fig-height: 12
+    fig-format: retina
+    fig-responsive: true
+    fig-dpi: 600
+execute:
+  keep-md: false
+  echo: true
+  error: false
+  message: false
+  warning: false
+  debug: false
+knitr:
+  opts_chunk:
+    autodep: true
+    fig.align: center
+    fig.retina: 2
+    fig.width: 14
+    fig.height: 12
+---
+
+```{r setup, include = FALSE}
+DOCNAME <- "de-astrocytes-between-regions-on-dataset-from-romanov2020"
+NOW <- Sys.time()
+
+# Time chunks during knitting
+knitr::knit_hooks$set(timeit = function(before) {
+  if (before) {
+    print(paste("Start:", Sys.time()))
+    NOW <<- Sys.time()
+  } else {
+    print(paste("Stop:", Sys.time()))
+    print(Sys.time() - NOW)
+  }
+})
+
+knitr::knit_hooks$set(debug = function(before, options, envir) {
+  if (!before) {
+    message(
+      paste(names(envir), as.list(envir),
+        sep = " = ", collapse = "\n"
+      )
+    )
+  }
+})
+
+knitr::opts_chunk$set(
+  cache          = FALSE,
+  dev            = c("png", "pdf"),
+  timeit         = TRUE
+)
+```
+
+## Load data and setup parameters
+
+```{r libraries, cache=FALSE}
+# Load tidyverse infrastructure packages
+suppressPackageStartupMessages({
+  library(future)
+  library(here)
+  library(tidyverse)
+  library(magrittr)
+  library(stringr)
+  library(skimr)
+  library(RColorBrewer)
+  library(viridis)
+})
+
+
+# Load packages for scRNA-seq analysis and visualisation
+suppressPackageStartupMessages({
+  library(ggplot2)
+  library(cowplot)
+  library(patchwork)
+  library(ggstatsplot)
+  library(anndata)
+  library(sceasy)
+  library(Seurat)
+  library(SeuratDisk)
+  library(SeuratWrappers)
+  library(scCustomize)
+})
+
+sc <- import("scanpy", convert = FALSE)
+```
+
+### Set paths
+
+```{r paths}
+src_dir <- here("code")
+data_dir <- here("../data")
+output_dir <- here("output")
+plots_dir <- here(output_dir, "figures/")
+tables_dir <- here(output_dir, "tables/")
+```
+
+### Load helper functions and gene-sets
+
+```{r source, cache = FALSE}
+source(here(src_dir, "genes.R"))
+source(here(src_dir, "functions.R"))
+```
+
+### Set fixed variables
+
+```{r params-computation, cache = FALSE}
+# set seed
+reseed <- 42
+set.seed(seed = reseed)
+
+# Parameters for parallel execution
+n_cores <- 32
+plan("multisession", workers = n_cores)
+options(
+  future.globals.maxSize = 100000 * 1024^2,
+  future.rng.onMisuse = "ignore"
+)
+plan()
+
+
+# ggplot2 theme
+theme_set(ggmin::theme_powerpoint())
+```
+
+```{r params}
+bioproject <- "PRJNA548917"
+project <- "romanov2020_Hypoth-dev"
+cb_fpr <- 0.001
+low_cutoff_gene <- 500
+high_cutoff_gene <- NULL
+high_cutoff_gene <- 6000
+low_cutoff_umis <- NULL
+low_cutoff_umis <- -Inf
+high_cutoff_umis <- 20000
+high_cutoff_pc_mt <- 15
+high_cutoff_pc_ribo <- 15
+high_cutoff_pc_hb <- 0.1
+high_cutoff_doublet_score <- 0.33
+high_cutoff_complexity <- 0.85
+connectivity_model <- "min_tree"
+k <- 10
+metric <- "euclidean"
+signature <- 100
+```
+
+## Load predicted astrocytes data and subset from Romanov RA et al 2020
+
+```{r load-data, cache = FALSE}
+anndata <- sc$read(here(
+  data_dir,
+  sprintf("resolved_subregions_by_microclusters/best_xgboost-subregional_%s-astrocytes_dataset-msp_%s-metric_%s-k_%s-sign_%s-amb_%s.h5ad", bioproject, connectivity_model, metric, k, signature, cb_fpr)
+))
+```
+
+### Convert adata object to R AnnDataR6 object.
+```{r convert-to-r}
+adata <- py_to_r(anndata)
+class(adata)
+class(adata$X)
+adata
+```
+
+```{r convert-to-seurat}
+srt_path <- here(
+  data_dir,
+  sprintf("resolved_subregions_by_microclusters/best_xgboost-subregional_%s-astrocytes_dataset-msp_%s-metric_%s-k_%s-sign_%s-amb_%s.h5Seurat", bioproject, connectivity_model, metric, k, signature, cb_fpr)
+)
+
+regsrt_path <- here(
+  data_dir,
+  sprintf("resolved_subregions_by_microclusters/%s_regulons-DER-astrocytes_dataset-msp_%s-metric_%s-k_%s-sign_%s-amb_%s.h5Seurat", bioproject, connectivity_model, metric, k, signature, cb_fpr)
+)
+
+expr_mtx <- t(as.matrix(adata$raw$X))
+colnames(expr_mtx) <- rownames(adata$X)
+rownames(expr_mtx) <- adata$var_names
+srt <- CreateSeuratObject(
+  expr_mtx,
+  assay = "RNA",
+  project = "romanov2020_Hypoth_dev",
+  meta.data = as.data.frame(adata$obs),
+  row.names = colnames(adata$X)
+)
+
+regmtx <- t(adata$obsm$X_aucell)
+colnames(regmtx) <- colnames(srt)
+rownames(regmtx) <- adata$obs_keys() %>% .[str_detect(string = ., pattern = "^Regulon")]
+
+regsrt <- CreateSeuratObject(
+  regmtx,
+  assay = "Regulons",
+  project = "romanov2020_Hypoth_dev",
+  meta.data = as.data.frame(adata$obs)
+)
+
+densmap_logit <- adata$obsm$X_umap_logit
+colnames(densmap_logit) <- c("densMAP_logit_1", "densMAP_logit_2")
+srt[["densmap_logit"]] <- CreateDimReducObject(embeddings = densmap_logit, key = "densMAP_logit_", assay = DefaultAssay(srt))
+# srt <- ProjectDim(srt, reduction = "densmap_logit")
+regsrt[["densmap_logit"]] <- CreateDimReducObject(embeddings = densmap_logit, key = "densMAP_logit_", assay = DefaultAssay(regsrt))
+# regsrt <- ProjectDim(regsrt, reduction = "densmap_logit")
+
+densmap_xgboost <- adata$obsm$X_umap
+colnames(densmap_xgboost) <- c("densMAP_xgboost_1", "densMAP_xgboost_2")
+srt[["densmap_xgboost"]] <- CreateDimReducObject(embeddings = densmap_xgboost, key = "densMAP_xgboost_", assay = DefaultAssay(srt))
+# srt <- ProjectDim(srt, reduction = "densmap_xgboost")
+regsrt[["densmap_xgboost"]] <- CreateDimReducObject(embeddings = densmap_xgboost, key = "densMAP_xgboost_", assay = DefaultAssay(regsrt))
+# regsrt <- ProjectDim(regsrt, reduction = "densmap_xgboost")
+
+Idents(srt) <- "predict_xgboost_subregion"
+Idents(regsrt) <- "predict_xgboost_subregion"
+srt <- Store_Palette_Seurat(seurat_object = srt, palette = rev(brewer.pal(n = 11, name = "Spectral")), palette_name = "expr_Colour_Pal")
+regsrt <- Store_Palette_Seurat(seurat_object = regsrt, palette = rev(brewer.pal(n = 11, name = "PiYG")), palette_name = "expr_Colour_Pal")
+SaveH5Seurat(srt, filename = srt_path, overwrite = TRUE)
+SaveH5Seurat(regsrt, filename = regsrt_path, overwrite = TRUE)
+```
+
+```{r load-seurat}
+srt <- LoadH5Seurat(file = srt_path)
+regsrt <- LoadH5Seurat(file = regsrt_path)
+Idents(srt) <- "predict_xgboost_subregion"
+Idents(regsrt) <- "predict_xgboost_subregion"
+print(srt)
+print(regsrt)
+```
+
+```{r find-marker-genes}
+srt <- NormalizeData(srt)
+srt <- FindVariableFeatures(srt, selection.method = "vst", nfeatures = 3000)
+all.genes <- rownames(srt)
+srt <- ScaleData(srt, features = all.genes)
+
+all_markers_genes <- FindAllMarkers(object = srt, verbose = F, test.use = "MAST", only.pos = T, min.pct = 0.05, logfc.threshold = 0.15) %>%
+  Add_Pct_Diff()
+write_csv(all_markers_genes, here(data_dir, sprintf("resolved_subregions_by_microclusters/%s-all-marker-genes.csv", bioproject)))
+
+all_markers_genes <- all_markers_genes %>%
+  filter(pct_diff > 0.1) %>%
+  group_by(cluster) %>%
+  arrange(desc(avg_log2FC)) %>%
+  arrange(cluster)
+all_markers_genes2 <- all_markers_genes %>%
+  filter(gene %in% c(npr, nmr, transcription_factors)) %>%
+  group_by(cluster) %>%
+  arrange(desc(avg_log2FC)) %>%
+  arrange(cluster)
+
+top_5 <- Extract_Top_Markers(marker_dataframe = all_markers_genes, num_genes = 5, group_by = "cluster", gene_column = "gene", rank_by = "avg_log2FC", make_unique = TRUE, named_vector = FALSE)
+top_30 <- Extract_Top_Markers(marker_dataframe = all_markers_genes, num_genes = 30, group_by = "cluster", gene_column = "gene", rank_by = "avg_log2FC")
+top_5s <- Extract_Top_Markers(marker_dataframe = all_markers_genes2, num_genes = 5, group_by = "cluster", gene_column = "gene", rank_by = "avg_log2FC", make_unique = TRUE, named_vector = FALSE)
+top_30s <- Extract_Top_Markers(marker_dataframe = all_markers_genes2, num_genes = 30, group_by = "cluster", gene_column = "gene", rank_by = "avg_log2FC")
+```
+
+```{r save-markers-featureplots-genes}
+Iterate_FeaturePlot_scCustom(reduction = "densmap_xgboost",
+  na_cutoff = NA,
+  pt.size = 4,
+  order = TRUE,
+  alpha_na_exp = 0.1,
+  alpha_exp = 0.75, seurat_object = srt, gene_list = top_30, single_pdf = FALSE, file_path = plots_dir, file_type=".pdf", file_name = sprintf("%s.pdf", bioproject), colors_use = srt@misc$expr_Colour_Pal
+)
+```
+
+```{r plt-dotplot-dendrogram-genes, fig.width=6, fig.height=16}
+Clustered_DotPlot(seurat_object = srt, colors_use_exp = viridis(n = 30, alpha = .75, direction = -1, option = "E"), features = top_5, k = 9)
+```
+
+```{r plt-dotplot-dendrogram-sgenes, fig.width=6, fig.height=16}
+Clustered_DotPlot(seurat_object = srt, colors_use_exp = viridis(n = 30, alpha = .75, direction = -1, option = "E"), features = top_5s, k = 9)
+```
+
+```{r plt-dotplot-dendrogram-genes-npr, fig.width=6, fig.height=18}
+DotPlot_scCustom(seurat_object = srt, colors_use = viridis(n = 30, alpha = .75, direction = -1, option = "E"), features = npr[npr %in% rownames(srt)], flip_axes = T, x_lab_rotate = TRUE)
+```
+
+```{r plt-dotplot-dendrogram-genes-nmr, fig.width=6, fig.height=24}
+DotPlot_scCustom(seurat_object = srt, colors_use = viridis(n = 30, alpha = .75, direction = -1, option = "E"), features = nmr[nmr %in% rownames(srt)], flip_axes = T, x_lab_rotate = TRUE)
+```
+
+```{r plt-dotplot-dendrogram-genes-adgen, fig.width=6, fig.height=24}
+DotPlot_scCustom(seurat_object = srt, colors_use = viridis(n = 30, alpha = .75, direction = -1, option = "E"), features = genes.embed[genes.embed %in% rownames(srt)], flip_axes = T, x_lab_rotate = TRUE)
+```
+
+```{r plt-dotplot-dendrogram-genes-mitochondrial, fig.width=6, fig.height=24}
+DotPlot_scCustom(seurat_object = srt, colors_use = viridis(n = 30, alpha = .75, direction = -1, option = "E"), features = mitochondrial[mitochondrial %in% rownames(srt)], flip_axes = T, x_lab_rotate = TRUE)
+```
+
+```{r de-pairs}
+de_01 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "0", ident.2 = "1",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_02 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "0", ident.2 = "2",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_03 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "0", ident.2 = "3",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_04 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "0", ident.2 = "4",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_05 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "0", ident.2 = "5",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_06 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "0", ident.2 = "6",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_07 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "0", ident.2 = "7",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_12 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "1", ident.2 = "2",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_13 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "1", ident.2 = "3",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_14 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "1", ident.2 = "4",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_15 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "1", ident.2 = "5",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_16 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "1", ident.2 = "6",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_17 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "1", ident.2 = "7",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_23 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "2", ident.2 = "3",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_24 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "2", ident.2 = "4",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_25 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "2", ident.2 = "5",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_26 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "2", ident.2 = "6",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_27 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "2", ident.2 = "7",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_34 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "3", ident.2 = "4",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_35 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "3", ident.2 = "5",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_36 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "3", ident.2 = "6",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_37 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "3", ident.2 = "7",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_45 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "4", ident.2 = "5",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_46 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "4", ident.2 = "6",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_47 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "4", ident.2 = "7",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_56 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "5", ident.2 = "6",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_57 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "5", ident.2 = "7",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+de_67 <- FindMarkers(srt,
+  assay = "RNA", ident.1 = "6", ident.2 = "7",
+  test.use = "LR",
+  only.pos = F,
+  min.pct = 0.01
+) %>% rownames_to_column("gene")
+
+
+top_genes <- list()
+
+combinations <- list(
+  contrast01 = de_01, contrast02 = de_02, contrast03 = de_03,
+  contrast04 = de_04, contrast05 = de_05, contrast06 = de_06,
+  contrast07 = de_07, contrast12 = de_12, contrast13 = de_13,
+  contrast14 = de_14, contrast15 = de_15, contrast16 = de_16,
+  contrast17 = de_17, contrast23 = de_23, contrast24 = de_24,
+  contrast25 = de_25, contrast26 = de_26, contrast27 = de_27,
+  contrast34 = de_34, contrast35 = de_35, contrast36 = de_36,
+  contrast37 = de_37, contrast45 = de_45, contrast46 = de_46,
+  contrast47 = de_47, contrast56 = de_56, contrast57 = de_57,
+  contrast67 = de_67
+) %>% compact()
+
+# Iterate through the 'combinations' list
+for (contrast_name in names(combinations)) {
+  # Create a unique file name for each data frame
+  file_name <- paste0(contrast_name, "_result.csv")
+
+  # Save the data frame as a CSV file
+  write_csv(combinations[[contrast_name]], here(tables_dir, file_name))
+
+  # Print a message to indicate progress
+  print(paste0("Saved: ", file_name))
+}
+
+for (contrast in names(combinations)) {
+  top_upregulated <- combinations[[contrast]] %>%
+    filter(p_val_adj < 0.05, avg_log2FC > 0, gene %in% gene_int) %>%
+    arrange(desc(avg_log2FC)) %>%
+    slice_head(n = 5)
+  top_downregulated <- combinations[[contrast]] %>%
+    filter(p_val_adj < 0.05, avg_log2FC < 0, gene %in% gene_int) %>%
+    arrange(avg_log2FC) %>%
+    slice_head(n = 5)
+
+  top_genes[[contrast]] <- c(top_upregulated$gene, top_downregulated$gene)
+}
+```
+
+```{r collapse-clusters}
+DefaultAssay(srt) <- "RNA"
+cluster.averages <- AverageExpression(srt, return.seurat = TRUE)
+DefaultAssay(cluster.averages) <- "RNA"
+
+cluster.averages
+```
+
+```{r de-pairs-plot, fig.width=14, fig.height=13}
+plot_pairs <- function(highlight_genes, pair_name) {
+  i <- pair_name %>% str_sub(9, 9)
+  j <- pair_name %>% str_sub(10, 10)
+  print(paste0("Comparison: ", i, " vs ", j))
+  plot <- CellScatter(cluster.averages, cell1 = i, cell2 = j, features = gene_int[gene_int %in% rownames(cluster.averages)], highlight = highlight_genes)
+  return(plot)
+}
+plots <- top_genes %>% imap(plot_pairs)
+plt_grid <- cowplot::plot_grid(plotlist = plots, ncol = 7, labels = names(top_genes) %>% map_chr(str_sub, 9, 10), label_size = 8)
+plt_grid
+
+save_plot(here(plots_dir, "de-pairs-plot.pdf"), plt_grid, base_width = 6, base_height = 7, base_asp = 1, ncol = 7, limitsize = FALSE)
+```
+
+
+```{r find-marker-regulons}
+# regsrt <- NormalizeData(regsrt)
+# regsrt <- FindVariableFeatures(regsrt, selection.method = "vst")
+# all.genes <- rownames(regsrt)
+# regsrt <- ScaleData(regsrt, features = all.genes)
+all_regulon_markers_regulons <- FindAllMarkers(object = regsrt, verbose = F, test.use = "LR", assay = "Regulons", only.pos = T, min.pct = 0.05, logfc.threshold = 0.1)
+write_csv(all_regulon_markers_regulons, here(data_dir, sprintf("resolved_subregions_by_microclusters/%s-all-marker-regulons.csv", bioproject)))
+
+if (dim(all_regulon_markers_regulons)[1] > 0) {
+  all_regulon_markers_regulons <- all_regulon_markers_regulons %>%
+    group_by(cluster) %>%
+    arrange(desc(avg_log2FC)) %>%
+    arrange(cluster)
+
+  top_5r <- Extract_Top_Markers(marker_dataframe = all_regulon_markers_regulons, num_genes = 5, group_by = "cluster", gene_column = "gene", rank_by = "avg_log2FC", make_unique = TRUE, named_vector = FALSE)
+  top_15r <- Extract_Top_Markers(marker_dataframe = all_regulon_markers_regulons, num_genes = 15, group_by = "cluster", gene_column = "gene", rank_by = "avg_log2FC")
+}
+```
+
+```{r save-markers-featureplots-regulons}
+Iterate_FeaturePlot_scCustom(reduction = "densmap_xgboost",
+    na_cutoff = NA,
+    pt.size = 4,
+    order = TRUE,
+    alpha_na_exp = 0.1,
+    alpha_exp = 0.75, seurat_object = regsrt, gene_list = rownames(regmtx), single_pdf = FALSE, file_path = plots_dir, file_type=".pdf", file_name = sprintf("%s-regulon.pdf", bioproject), colors_use = regsrt@misc$expr_Colour_Pal
+)
+```
+
+```{r plt-dotplot-dendrogram-regulons, fig.width=9, fig.height=24}
+Clustered_DotPlot(seurat_object = regsrt, colors_use_exp = viridis(n = 30, alpha = .75, direction = -1, option = "G"), features = rownames(regmtx), k = 14)
+```
+
+
+## Session information
+
+```{r session-info, cache = FALSE}
+sI <- sessioninfo::session_info()
+sI$loadedOnly <- NULL
+print(sI, locale = FALSE)
+```

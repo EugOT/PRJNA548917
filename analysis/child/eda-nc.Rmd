@@ -1,0 +1,2283 @@
+
+# Combined analysis of scRNA-seq datasets derived from the `r project`
+
+```{r load}
+samples_table <- readr::read_tsv(here("samples.tsv")) %>% arrange(Run)
+srr_set <- samples_table$Run
+scrublet <-
+  purrr::reduce(
+    srr_set %>% map(~read_scrublet(.x, fpr = 0.001)),
+    bind_rows)
+
+# Read in data
+cell_ranger_merged <-
+  Read10X_h5_Multi_Directory(
+    base_path = here("cellranger"),
+    default_10X_path = TRUE,
+    h5_filename = "filtered_feature_bc_matrix.h5",
+    merge = TRUE,
+    sample_names = srr_set
+  )
+
+# Create Seurat Object and specify orig.ident location
+combined_srt <- Seurat::CreateSeuratObject(
+  counts = cell_ranger_merged, names.field = 1, names.delim = "_",
+  min.features = 100, min.cells = 3
+)
+
+combined_srt$cell_name <- colnames(combined_srt)
+combined_srt@meta.data <-
+  combined_srt@meta.data %>%
+  left_join(scrublet,
+    by = c("cell_name",
+      "orig.ident" = "origin")) %>%
+  mutate(QC = ifelse(
+    test = predicted_doublets | doublet_score >= 0.95,
+    yes = "Doublet",
+    no = "Pass"))
+rownames(combined_srt@meta.data) <- colnames(combined_srt)
+
+rm(srt_list)
+plan(sequential)
+invisible(gc())
+options(future.globals.maxSize = 999999 * 1024^2)
+set.seed(seed = reseed)
+plan(multisession, workers = n_cores)
+```
+
+
+Quality Control for different types of features {.tabset}
+-----------------------------------------------
+
+### QC Violin plots
+
+```{r pl-vln-qc, fig.align='center', fig.width=16, fig.asp = 0.618}
+sex_genes <-
+  str_to_title(c(
+    "EHD2", "ESPL1", "JARID1D", "PNPLA4",
+    "RPS4Y1", "XIST", "tsix", "Eif2s3y",
+    "Ddx3y", "Uty", "Kdm5d"
+  )) %>% .[. %in% rownames(combined_srt)]
+stress_genes <-
+  str_to_title(c(
+    "Rpl26", "Gstp1", "Rpl35a", "Erh",
+    "Slc25a5", "Pgk1", "Eno1",
+    "Tubb2a", "Emc4", "Scg5"
+  )) %>% .[. %in% rownames(combined_srt)]
+
+combined_srt <-
+  Store_Palette_Seurat(
+    seurat_object = combined_srt,
+    palette = rev(brewer.pal(n = 11, name = "RdYlGn")),
+    palette_name = "mdat_Colour_Pal"
+  )
+combined_srt <-
+  Store_Palette_Seurat(
+    seurat_object = combined_srt,
+    palette = rev(brewer.pal(n = 11, name = "Spectral")),
+    palette_name = "expr_Colour_Pal"
+  )
+combined_srt <-
+  Store_Palette_Seurat(
+    seurat_object = combined_srt,
+    palette = qc_palette,
+    palette_name = "qc_Colour_Pal"
+  )
+
+
+combined_srt <-
+  Add_Mito_Ribo_Seurat(combined_srt, species = "mouse")
+combined_srt[["percent_hb"]] <-
+  PercentageFeatureSet(combined_srt, pattern = "^Hb[^(p)]")
+combined_srt <-
+  Add_Cell_Complexity_Seurat(combined_srt)
+
+# Visualize QC metrics as a violin plot
+p1 <-
+  QC_Plots_Complexity(
+    combined_srt,
+    high_cutoff = high_cutoff_complexity,
+    color_seed = reseed
+  )
+p2 <-
+  QC_Plots_Genes(
+    combined_srt,
+    low_cutoff = low_cutoff_gene,
+    high_cutoff = high_cutoff_gene,
+    plot_title = "Genes per Cell",
+    color_seed = reseed,
+    ggplot_default_colors = TRUE
+  )
+p3 <-
+  QC_Plots_UMIs(
+    combined_srt,
+    low_cutoff = low_cutoff_umis,
+    high_cutoff = high_cutoff_umis,
+    plot_title = "UMIs per Cell",
+    color_seed = reseed,
+    ggplot_default_colors = TRUE
+  )
+p4 <-
+  QC_Plots_Mito(
+    combined_srt,
+    high_cutoff = high_cutoff_pc_mt,
+    plot_title = "Mito genes % per Cell",
+    color_seed = reseed,
+    ggplot_default_colors = TRUE
+  )
+p5 <-
+  QC_Plots_Feature(
+    combined_srt,
+    feature = "percent_ribo",
+    high_cutoff = high_cutoff_pc_ribo,
+    y_axis_label = "% Ribosomal Genes Counts",
+    plot_title = "Ribo genes % per Cell",
+    color_seed = reseed,
+    ggplot_default_colors = TRUE
+  )
+p6 <-
+  QC_Plots_Feature(
+    combined_srt,
+    feature = "percent_hb",
+    high_cutoff = high_cutoff_pc_hb,
+    y_axis_label = "% Hemoglobin Genes Counts",
+    plot_title = "Hemoglobin genes % per Cell",
+    color_seed = reseed,
+    ggplot_default_colors = TRUE
+  )
+
+wrap_plots(p1, p2, p3, p4, p5, p6, ncol = 3)
+```
+
+### QC Scatter plots
+
+```{r pl-scatter-qc, fig.width=11, fig.asp = 0.8}
+plot1 <-
+  QC_Plot_GenevsFeature(
+    seurat_object = combined_srt,
+    feature1 = "percent_mito",
+    low_cutoff_gene = low_cutoff_gene,
+    high_cutoff_gene = high_cutoff_gene,
+    high_cutoff_feature = high_cutoff_pc_mt,
+    color_seed = reseed,
+    ggplot_default_colors = TRUE,
+    pt.size = 4,
+    shuffle_seed = reseed) &
+      scale_y_log10()
+plot2 <-
+  QC_Plot_UMIvsGene(
+    seurat_object = combined_srt,
+    low_cutoff_gene = low_cutoff_gene,
+    high_cutoff_gene = high_cutoff_gene,
+    low_cutoff_UMI = low_cutoff_umis,
+    high_cutoff_UMI = high_cutoff_umis,
+    color_seed = reseed,
+    ggplot_default_colors = TRUE,
+    pt.size = 4,
+    shuffle_seed = reseed) &
+      scale_x_log10() & scale_y_log10()
+plot3 <-
+  QC_Plot_GenevsFeature(
+    seurat_object = combined_srt,
+    feature1 = "percent_ribo",
+    low_cutoff_gene = low_cutoff_gene,
+    high_cutoff_gene = high_cutoff_gene,
+    high_cutoff_feature = high_cutoff_pc_ribo,
+    color_seed = reseed,
+    ggplot_default_colors = TRUE,
+    pt.size = 4,
+    shuffle_seed = reseed) &
+      scale_y_log10()
+plot4 <-
+  FeatureScatter(
+    combined_srt,
+    feature1 = "percent_ribo",
+    feature2 = "percent_mito",
+    shuffle = TRUE,
+    pt.size = 4,
+    seed = reseed
+  )
+(plot1 + plot2) / (plot3 + plot4)
+```
+
+### QC Scatter mito-threshold
+
+```{r pl-scatter-qc-comb-mito, fig.height=7, fig.width=13, fig.align='center'}
+QC_Plot_UMIvsGene(
+  seurat_object = combined_srt,
+  meta_gradient_name = "percent_mito",
+  low_cutoff_gene = low_cutoff_gene,
+  high_cutoff_gene = high_cutoff_gene,
+  low_cutoff_UMI = low_cutoff_umis,
+  high_cutoff_UMI = high_cutoff_umis,
+  meta_gradient_low_cutoff = high_cutoff_pc_mt,
+  meta_gradient_color = combined_srt@misc$mdat_Colour_Pal,
+  combination = TRUE,
+  color_seed = reseed,
+  ggplot_default_colors = TRUE,
+  pt.size = 3,
+  shuffle_seed = reseed
+) &
+  scale_x_log10() & scale_y_log10()
+```
+
+### QC Scatter ribo-threshold
+
+```{r pl-scatter-qc-comb-ribo, fig.height=7, fig.width=13, fig.align='center'}
+QC_Plot_UMIvsGene(
+  seurat_object = combined_srt,
+  meta_gradient_name = "percent_ribo",
+  low_cutoff_gene = low_cutoff_gene,
+  high_cutoff_gene = high_cutoff_gene,
+  low_cutoff_UMI = low_cutoff_umis,
+  high_cutoff_UMI = high_cutoff_umis,
+  meta_gradient_low_cutoff = high_cutoff_pc_ribo,
+  meta_gradient_color = combined_srt@misc$mdat_Colour_Pal,
+  combination = TRUE,
+  color_seed = reseed,
+  ggplot_default_colors = TRUE,
+  pt.size = 3,
+  shuffle_seed = reseed
+) &
+  scale_x_log10() & scale_y_log10()
+```
+
+### QC Scatter complexity-threshold
+
+```{r pl-scatter-qc-comb-complexity, fig.height=7, fig.width=13, fig.align='center'}
+QC_Plot_UMIvsGene(
+  seurat_object = combined_srt,
+  meta_gradient_name = "log10GenesPerUMI",
+  low_cutoff_gene = low_cutoff_gene,
+  high_cutoff_gene = high_cutoff_gene,
+  low_cutoff_UMI = low_cutoff_umis,
+  high_cutoff_UMI = high_cutoff_umis,
+  meta_gradient_low_cutoff = high_cutoff_complexity,
+  meta_gradient_color = combined_srt@misc$mdat_Colour_Pal,
+  combination = TRUE,
+  color_seed = reseed,
+  ggplot_default_colors = TRUE,
+  pt.size = 3,
+  shuffle_seed = reseed
+) &
+  scale_x_log10() & scale_y_log10()
+```
+
+### QC Scatter doublets by sample
+
+```{r pl-scatter-doublets-log-prob, echo=FALSE, fig.height=12, fig.width=16, fig.align='center'}
+Split_FeatureScatter(
+  seurat_object = combined_srt,
+  feature1 = "nFeature_RNA",
+  feature2 = "doublet_score",
+  colors_use = combined_srt@misc$qc_Colour_Pal,
+  split.by = "orig.ident",
+  group.by = "QC",
+  num_columns = ifelse(
+    length(unique(combined_srt$orig.ident)) >= 3,
+    3,
+    length(unique(combined_srt$orig.ident))
+  ),
+  shuffle = TRUE,
+  pt.size = 4,
+  seed = reseed
+) &
+  scale_x_log10() &
+  guides(colour = ggh4x::guide_stringlegend(face = "bold", spacing = 15))
+```
+
+### QC Scatter doublets-threshold
+
+```{r pl-scatter-qc-comb-doublets, fig.height=7, fig.width=13, fig.align='center'}
+QC_Plot_UMIvsGene(
+  seurat_object = combined_srt,
+  meta_gradient_name = "doublet_score",
+  low_cutoff_gene = low_cutoff_gene,
+  high_cutoff_gene = high_cutoff_gene,
+  low_cutoff_UMI = low_cutoff_umis,
+  high_cutoff_UMI = high_cutoff_umis,
+  meta_gradient_low_cutoff = high_cutoff_doublet_score,
+  meta_gradient_color = combined_srt@misc$mdat_Colour_Pal,
+  combination = TRUE,
+  color_seed = reseed,
+  ggplot_default_colors = TRUE,
+  pt.size = 3,
+  shuffle_seed = reseed
+) &
+  scale_x_log10() & scale_y_log10()
+```
+
+
+Apply QC thresholds to derive categories
+========================================
+
+```{r}
+combined_srt$QC <-
+  ifelse(
+    combined_srt@meta.data$log10GenesPerUMI < high_cutoff_complexity &
+      combined_srt@meta.data$QC == "Pass",
+    "Low_Complexity",
+    combined_srt@meta.data$QC
+  )
+combined_srt$QC <-
+  ifelse(
+    combined_srt@meta.data$log10GenesPerUMI < high_cutoff_complexity &
+      combined_srt@meta.data$QC != "Pass" &
+      combined_srt@meta.data$QC != "Low_Complexity",
+    paste("Low_Complexity", combined_srt@meta.data$QC, sep = ","),
+    combined_srt@meta.data$QC
+  )
+combined_srt$QC <-
+  ifelse(
+    combined_srt@meta.data$nFeature_RNA < low_cutoff_gene &
+      combined_srt@meta.data$QC == "Pass",
+    "Low_nFeature",
+    combined_srt@meta.data$QC
+  )
+combined_srt$QC <-
+  ifelse(
+    combined_srt@meta.data$nFeature_RNA < low_cutoff_gene &
+      combined_srt@meta.data$QC != "Pass" &
+      combined_srt@meta.data$QC != "Low_nFeature",
+    paste("Low_nFeature", combined_srt@meta.data$QC, sep = ","),
+    combined_srt@meta.data$QC
+  )
+combined_srt$QC <-
+  ifelse(
+    combined_srt@meta.data$percent_mito > high_cutoff_pc_mt &
+      combined_srt@meta.data$QC == "Pass",
+    "High_MT",
+    combined_srt@meta.data$QC
+  )
+combined_srt$QC <-
+  ifelse(
+    combined_srt@meta.data$percent_mito > high_cutoff_pc_mt &
+      combined_srt@meta.data$QC != "Pass" &
+      combined_srt@meta.data$QC != "High_MT",
+    paste("High_MT", combined_srt@meta.data$QC, sep = ","),
+    combined_srt@meta.data$QC
+  )
+combined_srt$QC <-
+  ifelse(
+    combined_srt@meta.data$nCount_RNA > high_cutoff_umis &
+      combined_srt@meta.data$QC == "Pass",
+    "High_UMIs",
+    combined_srt@meta.data$QC
+  )
+combined_srt$QC <-
+  ifelse(
+    combined_srt@meta.data$nCount_RNA > high_cutoff_umis &
+      combined_srt@meta.data$QC != "Pass" &
+      combined_srt@meta.data$QC != "High_UMIs",
+    paste("High_UMIs", combined_srt@meta.data$QC, sep = ","),
+    combined_srt@meta.data$QC
+  )
+combined_srt$QC <-
+  ifelse(
+    combined_srt@meta.data$percent_ribo > high_cutoff_pc_ribo &
+      combined_srt@meta.data$QC == "Pass",
+    "High_Ribo",
+    combined_srt@meta.data$QC
+  )
+combined_srt$QC <-
+  ifelse(
+    combined_srt@meta.data$percent_ribo > high_cutoff_pc_ribo &
+      combined_srt@meta.data$QC != "Pass" &
+      combined_srt@meta.data$QC != "High_Ribo",
+    paste("High_Ribo", combined_srt@meta.data$QC, sep = ","),
+    combined_srt@meta.data$QC
+  )
+combined_srt$QC <-
+  ifelse(
+    combined_srt@meta.data$percent_hb > high_cutoff_pc_hb &
+      combined_srt@meta.data$QC == "Pass",
+    "High_Hgb",
+    combined_srt@meta.data$QC
+  )
+combined_srt$QC <-
+  ifelse(
+    combined_srt@meta.data$percent_hb > high_cutoff_pc_hb &
+      combined_srt@meta.data$QC != "Pass" &
+      combined_srt@meta.data$QC != "High_Hgb",
+    paste("High_Hgb", combined_srt@meta.data$QC, sep = ","),
+    combined_srt@meta.data$QC
+  )
+table(combined_srt$QC)
+
+
+```
+
+
+Let's see how Scrublet score match distributed across our categories
+
+```{r pl-scatter-doublets-log-prob-qc-categories, echo=FALSE, fig.height=14, fig.width=17, fig.align='center'}
+Split_FeatureScatter(
+  seurat_object = combined_srt,
+  feature1 = "nFeature_RNA",
+  feature2 = "doublet_score",
+  colors_use = combined_srt@misc$qc_Colour_Pal,
+  split.by = "orig.ident",
+  group.by = "QC",
+  num_columns = if_else(
+    length(unique(combined_srt$orig.ident)) >= 3,
+    3,
+    length(unique(combined_srt$orig.ident))),
+  shuffle = TRUE,
+  pt.size = 3,
+  seed = reseed
+) &
+  scale_x_log10() &
+  guides(colour = ggh4x::guide_stringlegend(face = "bold", spacing = 15))
+```
+
+Derive initial dimensional reductions and clusters of unfiltered dataset {.tabset}
+------------------------------------------------------------------------
+
+### HVG
+
+```{r pl-init-dr-hvg, fig.align='center', fig.asp=1.3, fig.width=9}
+invisible(gc())
+set.seed(reseed)
+
+combined_srt <- NormalizeData(combined_srt)
+combined_srt <-
+  FindVariableFeatures(
+    combined_srt,
+    selection.method = "vst",
+    nfeatures = 3000
+  )
+top100 <- head(VariableFeatures(combined_srt), 100)
+plot5 <- VariableFeaturePlot(combined_srt)
+LabelPoints(plot = plot5, points = top100, repel = TRUE, xnudge = 0, ynudge = 0)
+all_genes <- rownames(combined_srt)
+hvg <- VariableFeatures(combined_srt)
+var_regex <- "^Hla-|^Ig[hjkl]|^Rna|^mt-|^Rp[sl]|^Hb[^(p)]|^Gm"
+hvg <- hvg[str_detect(pattern = var_regex, string = hvg, negate = TRUE)]
+agg_genes <-
+  GetAssayData(combined_srt, slot = "counts", assay = "RNA") |> rowSums()
+all_genes <-
+  all_genes[agg_genes > 0.001 * ncol(combined_srt)]
+all_genes <-
+  all_genes[str_detect(pattern = var_regex, string = all_genes, negate = TRUE)]
+
+combined_srt[["var_regex"]] <-
+  PercentageFeatureSet(combined_srt, pattern = var_regex)
+
+keep_genes <-
+  c(gene_int, hvg) %>%
+  unique() %>%
+  .[!. %in% housekeeping_mouse] %>%
+  .[!. %in% sex_genes] %>%
+  .[!. %in% stress_genes]
+glimpse(keep_genes)
+
+out_of_hvg <- keep_genes[!keep_genes %in% hvg]
+kable_material(
+  kable(out_of_hvg, "html"),
+  bootstrap_options = c(
+    "bordered",
+    "condensed",
+    "responsive",
+    "striped"
+  ),
+  position = "left",
+  font_size = 14
+)
+
+hvg <- hvg[hvg %in% keep_genes]
+```
+
+### PCA gene loadings
+
+```{r pl-init-dr-pca-genes, fig.align='center', fig.asp=1.3, fig.width=9}
+invisible(gc())
+set.seed(reseed)
+
+combined_srt <- ScaleData(combined_srt,
+  features = hvg,
+  vars.to.regress = c(
+    "log10GenesPerUMI"
+  )
+)
+
+npcs <- 50
+combined_srt <- RunPCA(combined_srt,
+  features = hvg,
+  npcs = npcs,
+  seed.use = reseed,
+  verbose = TRUE
+)
+VizDimLoadings(combined_srt, dims = 1:9, reduction = "pca") &
+  theme(
+    axis.text = element_text(size = 5),
+    axis.title = element_text(size = 8, face = "bold")
+  )
+```
+
+```{r update-gene-lists-rna, include=FALSE}
+source(here(src_dir, "genes.R"))
+npr %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+np %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+gene_int %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+irs_genes %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+neurotrans %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+glut %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+gaba %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+dopam %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+ach %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+mcr_genes %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+genes.embed %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+genes.nature %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+genes.jj %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+genes.anatomy.jj %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+astroenriched_mouse %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+astroprogenitor_humans %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+astromature_humans %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+```
+
+### Heatmap
+
+```{r pl-init-dr-pca-heatmap, fig.align='center', fig.asp=1.3, fig.width=9}
+DimHeatmap(
+  combined_srt,
+  dims = 1:9,
+  nfeatures = 20,
+  cells = 500,
+  balanced = TRUE
+)
+```
+
+### PCA Embedding
+
+```{r pl-init-dr-pca-embedding, fig.align='center', fig.asp=1.3, fig.width=9}
+DimPlot_scCustom(
+  combined_srt,
+  reduction = "pca",
+  pt.size = 3,
+  ggplot_default_colors = TRUE,
+  color_seed = reseed,
+  shuffle = TRUE,
+  seed = reseed,
+  repel = TRUE,
+  label = TRUE,
+  label.size = 5
+)
+```
+
+### Elbow
+
+```{r pl-init-dr-pca-elbow, fig.align='center', fig.asp=1.3, fig.width=9}
+ElbowPlot(combined_srt)
+```
+
+### JackStraw
+
+```{r pl-init-dr-pca-jackstraw, fig.align='center', fig.asp=1.3, fig.width=9}
+invisible(gc())
+set.seed(reseed)
+
+combined_srt <-
+  JackStraw(
+    object = combined_srt,
+    assay = "RNA",
+    reduction = "pca",
+    dims = npcs,
+    num.replicate = 100,
+    prop.freq = 0.02,
+    maxit = 1000
+  )
+combined_srt <-
+  ScoreJackStraw(combined_srt,
+    dims = seq_along(combined_srt[["pca"]]@stdev)
+  )
+JackStrawPlot(combined_srt, dims = seq_along(combined_srt[["pca"]]@stdev))
+```
+
+```{r pl-init-dr, fig.align='center', fig.asp=1.3, fig.width=9}
+test_pc <-
+  pc_score(
+    object = combined_srt,
+    PCs = seq_along(combined_srt[["pca"]]@stdev),
+    score.thresh = 1e-05
+  )
+selected_pcs <-
+  seq_along(combined_srt[["pca"]]@stdev)[
+    test_pc$Score <= 1e-05 &
+      (combined_srt[["pca"]]@stdev >
+        quantile(combined_srt[["pca"]]@stdev, .10))
+  ]
+```
+
+```{r pl-init-dr-umap, fig.align='center', fig.asp=1.3, fig.width=9}
+invisible(gc())
+set.seed(reseed)
+
+combined_srt <-
+  combined_srt |>
+  FindNeighbors(
+    dims = selected_pcs,
+    k.param = 15,
+    annoy.metric = "euclidean",
+    n.trees = 100,
+    verbose = FALSE
+  ) |>
+  RunUMAP(
+    dims = selected_pcs,
+    reduction.name = "umap",
+    reduction.key = "UMAP_",
+    return.model = FALSE,
+    umap.method = "umap-learn",
+    densmap = TRUE,
+    dens.lambda = 1L,
+    dens.frac = 0.3,
+    n.epochs = 1000L,
+    n.neighbors = 15L,
+    min.dist = 0.01,
+    spread = 2L,
+    metric = "correlation",
+    init = "pca",
+    seed.use = reseed,
+    verbose = FALSE
+  )
+```
+
+```{r pl-init-dr-resolution, fig.align='center', fig.asp=1.3, fig.width=9}
+metadata <- combined_srt@meta.data
+rownames(metadata) <- colnames(combined_srt)
+ref_labels <- metadata$orig.ident
+
+resolutions <-
+  modularity_event_sampling(
+    A = combined_srt@graphs$RNA_snn,
+    n.res = 4,
+    gamma.min = 0.5,
+    gamma.max = 3.000001
+  ) # sample based on the similarity matrix
+```
+
+Clustering trees {.tabset}
+----------------
+
+Clustering trees show the relationship between clusterings at adjacent
+resolutions. Each cluster is represented as a node in a graph and the edges show
+the overlap between clusters.
+
+### Standard
+
+Coloured by clustering resolution.
+
+```{r pl-init-dr-clustree, fig.align='center', fig.asp=1.3, fig.width=9}
+invisible(gc())
+set.seed(reseed)
+
+# clustering using Suerat
+combined_srt <- combined_srt %>%
+  FindClusters(
+    algorithm = "leiden",
+    partition.type = "ModularityVertexPartition",
+    method = "igraph",
+    n.iter = -1,
+    resolution = resolutions,
+    random.seed = reseed,
+    verbose = FALSE
+  )
+
+# initial cluster tree from Seurat flat clustering
+plot_clustree(
+  labelmat = combined_srt@meta.data,
+  prefix = "RNA_snn_res.",
+  ref.labels = if (n_unique(ref_labels) != 1) ref_labels else combined_srt$seurat_clusters,
+  plot.ref = FALSE,
+  layout = "sugiyama",
+  use_core_edges = FALSE
+)
+```
+
+### Stability
+
+Coloured by the SC3 stability metric.
+
+```{r init-clustree-stability}
+plot_clustree(
+  labelmat = combined_srt@meta.data,
+  prefix = "RNA_snn_res.",
+  node_colour = "sc3_stability",
+  plot.ref = FALSE,
+  layout = "sugiyama",
+  use_core_edges = FALSE
+)
+```
+
+### Genes {.tabset}
+
+Coloured by the expression of known marker genes.
+
+```{r init-clustree-genes, results = "hide"}
+src_list <- map(genes.embed, function(gene) {
+    src <- c("#### {{gene}} {.unnumbered}",
+             "```{r init-clustree-{{gene}}}",
+             "clustree(combined_srt, node_colour = '{{gene}}',",
+                      "node_colour_aggr = 'mean', exprs = 'scale.data') +",
+             "scale_colour_viridis_c(option = 'plasma', begin = 0.3)",
+             "```",
+             "")
+    knitr::knit_expand(text = src)
+})
+
+out <- knitr::knit_child(text = unlist(src_list), options = list(cache = FALSE))
+```
+
+`r out`
+
+Reconcile clustering tree {.tabset}
+-------------------------
+
+### MRTree
+
+```{r pl-mrtree-init-tree, fig.align='center', fig.asp=.309, fig.width=9}
+out <- mrtree(
+  combined_srt,
+  prefix = "RNA_snn_res.",
+  n.cores = n_cores,
+  consensus = FALSE,
+  sample.weighted = TRUE,
+  augment.path = FALSE,
+  verbose = FALSE
+)
+# weight per sample is encoraged if the classes are imbalanced
+
+plot_tree(
+  labelmat = out$labelmat.mrtree,
+  ref.labels = if (n_unique(ref_labels) != 1) ref_labels else combined_srt$seurat_clusters,
+  plot.piechart = TRUE,
+  node.size = 0.2,
+  tip.label.dist = 10,
+  bottom.margin = 30
+)
+```
+
+### Adjusted Multiresolution Rand Index (AMRI)
+
+```{r pl-mrtree-init-amri, fig.align='center', fig.asp=.309, fig.width=9}
+ks_flat <- apply(
+  out$labelmat.flat,
+  2,
+  FUN = function(x) {
+    length(unique(x))
+  }
+)
+ks_mrtree <- apply(
+  out$labelmat.mrtree,
+  2,
+  FUN = function(x) {
+    length(unique(x))
+  }
+)
+amri_flat <- sapply(seq_len(ncol(out$labelmat.flat)), function(i) {
+  AMRI(out$labelmat.flat[, i], ref_labels)$amri
+})
+amri_flat <- aggregate(amri_flat, by = list(k = ks_flat), FUN = mean)
+amri_recon <- sapply(seq_len(ncol(out$labelmat.mrtree)), function(i) {
+  AMRI(out$labelmat.mrtree[, i], ref_labels)$amri
+})
+
+df <- rbind(
+  data.frame(
+    k = amri_flat$k,
+    amri = amri_flat$x,
+    method = "Seurat flat"
+  ),
+  data.frame(k = ks_mrtree, amri = amri_recon, method = "MRtree")
+)
+ggplot2::ggplot(data = df, aes(x = k, y = amri, color = method)) +
+  geom_line() +
+  theme_bw()
+```
+
+### Stability
+
+```{r pl-mrtree-init-stability, fig.align='center', fig.asp=.309, fig.width=9}
+stab_out <- stability_plot(out)
+stab_out$plot
+```
+
+```{r pl-mrtree-init-select, fig.align='center', fig.asp=.309, fig.width=9}
+kable_material(
+  kable(
+    stab_out$df,
+    "html"
+  ),
+  bootstrap_options = c(
+    "bordered",
+    "condensed",
+    "responsive",
+    "striped"
+  ),
+  position = "left",
+  font_size = 14
+)
+
+res_k <- select_resolution(stab_out$df)
+
+kable_material(
+  kable(
+    table(
+      out$labelmat.mrtree[, which.min(
+        abs(as.integer(
+          str_remove(dimnames(
+            out$labelmat.mrtree
+          )[[2]], "K")
+        ) - res_k)
+      )]
+    ),
+    "html"
+  ),
+  bootstrap_options = c(
+    "bordered",
+    "condensed",
+    "responsive",
+    "striped"
+  ),
+  position = "left",
+  font_size = 14
+)
+
+combined_srt$k_tree <- out$labelmat.mrtree[, which.min(
+  abs(as.integer(
+    str_remove(dimnames(
+      out$labelmat.mrtree
+    )[[2]], "K")
+  ) - res_k)
+)] %>%
+  as.numeric() %>%
+  as.factor()
+```
+
+Visualize QC metrics as a violin plot per cluster  {.tabset}
+-------------------------------------------------
+
+### Mitochondrial
+
+```{r pl-vln-qc-init-mito, fig.align='center', fig.asp=.618, fig.width=5}
+QC_Plots_Mito(
+  combined_srt,
+  high_cutoff = high_cutoff_pc_mt,
+  plot_title = "Mito genes % per Cell (overclustered)",
+  color_seed = reseed,
+  ggplot_default_colors = TRUE
+)
+```
+
+### Ribosomal
+
+```{r pl-vln-qc-init-ribo, fig.align='center', fig.asp=.618, fig.width=5}
+QC_Plots_Feature(
+  combined_srt,
+  feature = "percent_ribo",
+  high_cutoff = high_cutoff_pc_ribo,
+  y_axis_label = "% Ribosomal Genes Counts",
+  plot_title = "Ribo genes % per Cell (overclustered)",
+  color_seed = reseed,
+  ggplot_default_colors = TRUE
+)
+```
+
+Selected init clustering resolution
+-----------------------------------
+
+```{r pl-umap-clusters, fig.align='center', fig.asp=.309, fig.width=9}
+p1 <-
+  DimPlot_scCustom(
+    combined_srt,
+    pt.size = 3,
+    ggplot_default_colors = TRUE,
+    color_seed = reseed,
+    shuffle = TRUE,
+    seed = reseed,
+    repel = TRUE,
+    label = TRUE,
+    label.size = 5
+  ) +
+  ggtitle("Unsupervised overclustering") + NoLegend()
+p2 <-
+  DimPlot_scCustom(
+    combined_srt,
+    group.by = "k_tree",
+    pt.size = 3,
+    ggplot_default_colors = TRUE,
+    color_seed = reseed,
+    shuffle = TRUE,
+    seed = reseed,
+    repel = TRUE,
+    label = TRUE,
+    label.size = 5
+  ) +
+  ggtitle("MRTree") + NoLegend()
+
+p1 | p2
+
+Idents(combined_srt) <- "k_tree"
+```
+
+Visualize QC metrics as a UMAP embedding plot {.tabset}
+---------------------------------------------
+
+### Mitochondrial
+
+```{r pl-umap-qc-mito, fig.align='center', fig.asp=.618, fig.width=5}
+FeaturePlot_scCustom(
+  combined_srt,
+  features = "percent_mito",
+  colors_use = combined_srt@misc$mdat_Colour_Pal,
+  na_cutoff = NA,
+  pt.size = 4,
+  order = TRUE,
+  alpha_na_exp = 0.1,
+  alpha_exp = 0.45
+) &
+  theme(plot.title = element_text(size = 16))
+```
+
+### Mitochondrial with subset threshold
+
+```{r pl-umap-qc-mito-subset, fig.align='center', fig.asp=.618, fig.width=5}
+FeaturePlot_scCustom(
+  combined_srt,
+  features = "percent_mito",
+  colors_use = combined_srt@misc$mdat_Colour_Pal,
+  na_cutoff = high_cutoff_pc_mt,
+  pt.size = 4,
+  order = TRUE,
+  alpha_na_exp = 0.1,
+  alpha_exp = 0.45
+) &
+  theme(plot.title = element_text(size = 16))
+```
+
+### Number of genes expressed
+
+```{r pl-umap-qc-ngenes, fig.align='center', fig.asp=.618, fig.width=5}
+FeaturePlot_scCustom(
+  combined_srt,
+  features = "nFeature_RNA",
+  colors_use = combined_srt@misc$mdat_Colour_Pal,
+  pt.size = 4,
+  order = TRUE,
+  alpha_na_exp = 0.1,
+  alpha_exp = 0.45
+) &
+  theme(plot.title = element_text(size = 16))
+```
+
+### Number of genes expressed with subset threshold
+
+```{r pl-umap-qc-ngenes-subset, fig.align='center', fig.asp=.618, fig.width=5}
+FeaturePlot_scCustom(
+  combined_srt,
+  features = "nFeature_RNA",
+  colors_use = combined_srt@misc$mdat_Colour_Pal,
+  na_cutoff = low_cutoff_gene,
+  pt.size = 4,
+  order = TRUE,
+  alpha_na_exp = 0.1,
+  alpha_exp = 0.45
+) &
+  theme(plot.title = element_text(size = 16))
+```
+
+### Doublet score with arbitrary-middle cutoff
+
+```{r pl-umap-qc-doublets, fig.align='center', fig.asp=.618, fig.width=5}
+FeaturePlot_scCustom(
+  combined_srt,
+  features = "doublet_score",
+  colors_use = combined_srt@misc$mdat_Colour_Pal,
+  na_cutoff = high_cutoff_doublet_score,
+  pt.size = 4,
+  order = TRUE,
+  alpha_na_exp = 0.1,
+  alpha_exp = 0.45
+) &
+  theme(plot.title = element_text(size = 16))
+```
+
+
+Visualize categories as a UMAP embedding plot {.tabset}
+---------------------------------------------
+
+### QC categories
+
+```{r}
+DimPlot_scCustom(
+  seurat_object = combined_srt,
+  group.by = "QC",
+  pt.size = 3,
+  colors_use = combined_srt@misc$qc_Colour_Pal,
+  shuffle = TRUE,
+  seed = reseed,
+  repel = TRUE,
+  label = TRUE,
+  label.size = 5
+)
+```
+
+### Clusters
+
+```{r}
+DimPlot_scCustom(
+  combined_srt,
+  pt.size = 3,
+  ggplot_default_colors = TRUE,
+  color_seed = reseed,
+  shuffle = TRUE,
+  seed = reseed,
+  repel = TRUE,
+  label = TRUE,
+  label.size = 5
+)
+```
+
+### Clusters after subset
+
+```{r}
+combined_srt <- subset(combined_srt, subset = QC == "Pass")
+DimPlot_scCustom(
+  combined_srt,
+  pt.size = 3,
+  ggplot_default_colors = TRUE,
+  color_seed = reseed,
+  shuffle = TRUE,
+  seed = reseed,
+  repel = TRUE,
+  label = TRUE,
+  label.size = 5
+)
+```
+
+Visualize QC metrics as a violin plot again after subset
+--------------------------------------------------------
+
+```{r pl-vln-qc-subset, fig.align='center', fig.width=9, fig.asp = 0.618}
+p1 <-
+  QC_Plots_Complexity(
+    seurat_object = combined_srt,
+    color_seed = reseed,
+    ggplot_default_colors = TRUE
+  )
+p2 <-
+  QC_Plots_Genes(
+    seurat_object = combined_srt,
+    low_cutoff = low_cutoff_gene,
+    high_cutoff = high_cutoff_gene,
+    plot_title = "Genes per Cell",
+    color_seed = reseed,
+    ggplot_default_colors = TRUE
+  )
+p3 <-
+  QC_Plots_UMIs(
+    seurat_object = combined_srt,
+    low_cutoff = low_cutoff_umis,
+    high_cutoff = high_cutoff_umis,
+    plot_title = "UMIs per Cell",
+    color_seed = reseed,
+    ggplot_default_colors = TRUE
+  )
+p4 <-
+  QC_Plots_Mito(
+    seurat_object = combined_srt,
+    high_cutoff = high_cutoff_pc_mt,
+    plot_title = "Mito genes % per Cell",
+    color_seed = reseed,
+    ggplot_default_colors = TRUE
+  )
+p5 <-
+  QC_Plots_Feature(
+    seurat_object = combined_srt,
+    feature = "percent_ribo",
+    high_cutoff = high_cutoff_pc_ribo,
+    y_axis_label = "% Ribosomal Genes Counts",
+    plot_title = "Ribo genes % per Cell",
+    color_seed = reseed,
+    ggplot_default_colors = TRUE
+  )
+p6 <-
+  QC_Plots_Feature(
+    seurat_object = combined_srt,
+    feature = "percent_hb",
+    high_cutoff = high_cutoff_pc_hb,
+    y_axis_label = "% Hemoglobin Genes Counts",
+    plot_title = "Hemoglobin genes % per Cell",
+    color_seed = reseed,
+    ggplot_default_colors = TRUE
+  )
+
+wrap_plots(p1, p2, p3, p4, p5, p6, ncol = 3)
+```
+
+# Reevaluate after subsetting low-quality cells
+
+```{r}
+combined_srt$comb_clstr1 <- Idents(combined_srt)
+s_genes <-
+  gorth(
+    cc.genes.updated.2019$s.genes,
+    source_organism = "hsapiens",
+    target_organism = "mmusculus")$ortholog_name
+g2m_genes <-
+  gorth(
+    cc.genes.updated.2019$g2m.genes,
+    source_organism = "hsapiens",
+    target_organism = "mmusculus")$ortholog_name
+
+invisible(gc())
+set.seed(reseed)
+
+combined_srt <-
+  CellCycleScoring(combined_srt,
+    s.features = s_genes,
+    g2m.features = g2m_genes
+  )
+table(combined_srt[[]]$Phase)
+```
+
+Mitochondrial genes expression {.tabset}
+------------------------------
+
+### UMAP
+
+```{r fig.align='center', fig.asp=.618, fig.width=5}
+FeaturePlot_scCustom(
+  combined_srt,
+  features = "percent_mito",
+  label.size = 4,
+  repel = TRUE,
+  pt.size = 3,
+  label = TRUE,
+  colors_use = combined_srt@misc$mdat_Colour_Pal,
+  order = TRUE,
+  alpha_na_exp = 0.1,
+  alpha_exp = 0.45) &
+    theme(plot.title = element_text(size = 16))
+```
+
+### Violin
+
+```{r fig.align='center', fig.asp=.618, fig.width=5}
+QC_Plots_Mito(
+  combined_srt,
+  high_cutoff = high_cutoff_pc_mt,
+  plot_title = "Mito genes % per Cell",
+  color_seed = reseed,
+  ggplot_default_colors = TRUE
+)
+```
+
+Ribosomal genes expression {.tabset}
+--------------------------
+
+### UMAP
+
+```{r fig.align='center', fig.asp=.618, fig.width=5}
+FeaturePlot_scCustom(
+  combined_srt,
+  features = "percent_ribo",
+  label.size = 4,
+  repel = TRUE,
+  pt.size = 3,
+  label = TRUE,
+  colors_use = combined_srt@misc$mdat_Colour_Pal,
+  order = TRUE,
+  alpha_na_exp = 0.1,
+  alpha_exp = 0.45
+) &
+    theme(plot.title = element_text(size = 16))
+```
+
+### Violin
+
+```{r fig.align='center', fig.asp=.618, fig.width=5}
+QC_Plots_Feature(
+  combined_srt,
+  feature = "percent_ribo",
+  high_cutoff = high_cutoff_pc_ribo,
+  y_axis_label = "% Ribosomal Genes Counts",
+  plot_title = "Ribo genes % per Cell",
+  color_seed = reseed,
+  ggplot_default_colors = TRUE
+)
+```
+
+Total UMIs and Genes
+--------------------
+
+```{r fig.align='center', fig.asp=.618, fig.width=5}
+p1 <-
+  QC_Plots_Genes(
+    combined_srt,
+    low_cutoff = low_cutoff_gene,
+    high_cutoff = high_cutoff_gene,
+    plot_title = "Genes per Cell",
+    color_seed = reseed,
+    ggplot_default_colors = TRUE
+  )
+p2 <-
+  QC_Plots_UMIs(
+    combined_srt,
+    low_cutoff = low_cutoff_umis,
+    high_cutoff = high_cutoff_umis,
+    plot_title = "UMIs per Cell",
+    color_seed = reseed,
+    ggplot_default_colors = TRUE
+  )
+p1 | p2
+```
+
+Cell Cycle genes expression {.tabset}
+---------------------------
+
+### UMAP
+
+```{r fig.align='center', fig.width=9, fig.asp = 0.309}
+FeaturePlot_scCustom(
+  combined_srt,
+  features = c("S.Score", "G2M.Score"),
+  label.size = 4,
+  repel = TRUE,
+  pt.size = 3,
+  label = TRUE,
+  colors_use = combined_srt@misc$mdat_Colour_Pal,
+  na_cutoff = NA,
+  order = TRUE,
+  alpha_na_exp = 0.1,
+  alpha_exp = 0.45
+) &
+    theme(plot.title = element_text(size = 16))
+```
+
+### Violin
+
+```{r fig.align='center', fig.width=7, fig.asp = 0.618}
+VlnPlot(combined_srt,
+  features = c("S.Score", "G2M.Score")
+) &
+  theme(plot.title = element_text(size = 16))
+```
+
+Apply SCTransform pipeline
+==========================
+
+```{r normalisation}
+plan("sequential")
+invisible(gc())
+set.seed(reseed)
+plan(multisession, workers = n_cores)
+
+# normalize and run dimensionality reduction on control dataset
+npcs <- 30
+metadata <- combined_srt@meta.data
+rownames(metadata) <- colnames(combined_srt)
+combined_srt <-
+  SCTransform(
+    combined_srt,
+    vst.flavor = "v2",
+    ncells = ncol(combined_srt),
+    variable.features.n = 3500,
+    vars.to.regress = c(
+      "log10GenesPerUMI",
+      "S.Score", "G2M.Score"
+    ),
+    return.only.var.genes = TRUE,
+    seed.use = reseed,
+    verbose = FALSE
+  )
+hvg <- VariableFeatures(combined_srt)
+var_regex <- "^Hla-|^Ig[hjkl]|^Rna|^mt-|^Rp[sl]|^Hb[^(p)]|^Gm"
+hvg <- hvg[str_detect(pattern = var_regex, string = hvg, negate = TRUE)]
+
+keep_genes <-
+  c(gene_int, hvg) %>%
+  unique() %>%
+  .[!. %in% housekeeping_mouse] %>%
+  .[!. %in% sex_genes] %>%
+  .[!. %in% stress_genes]
+glimpse(keep_genes)
+
+out_of_hvg <- keep_genes[!keep_genes %in% hvg]
+kable_material(
+  kable(out_of_hvg, "html"),
+  bootstrap_options = c(
+    "bordered",
+    "condensed",
+    "responsive",
+    "striped"
+  ),
+  position = "left",
+  font_size = 14
+)
+
+hvg <- hvg[hvg %in% keep_genes]
+
+combined_srt <- combined_srt %>%
+  RunPCA(features = hvg, npcs = npcs, seed.use = reseed, verbose = FALSE)
+```
+
+```{r update-gene-lists-sct}
+source(here(src_dir, "genes.R"))
+npr %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+np %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+irs_genes %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+neurotrans %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+glut %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+gaba %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+dopam %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+ach %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+mcr_genes %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+genes.embed %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+genes.nature %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+genes.jj %<>% .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+genes.anatomy.jj %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+astroenriched_mouse %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+astroprogenitor_humans %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+astromature_humans %<>%
+  .[. %in% rownames(GetAssayData(combined_srt, slot = "scale.data"))]
+```
+
+Derive dimensional reductions and clusters of filtered dataset {.tabset}
+--------------------------------------------------------------
+
+```{r pca-genes}
+print(combined_srt[["pca"]], dims = 1:5, nfeatures = 5)
+```
+
+### PCA gene loadings
+
+```{r pl-pca-loadings, fig.asp=1.618, fig.width=8}
+VizDimLoadings(combined_srt, dims = 1:4, reduction = "pca")
+```
+
+### Heatmap
+
+```{r pl-pca-heatmap, fig.height=8, fig.width=6}
+DimHeatmap(combined_srt, dims = 1:15, cells = 500, balanced = TRUE)
+```
+
+### Elbow
+
+```{r pl-elbow-pca, fig.height=4, fig.width=6}
+ElbowPlot(combined_srt, ndims = npcs)
+```
+
+```{r pl-unsupervised}
+invisible(gc())
+set.seed(reseed)
+
+combined_srt <-
+  combined_srt |>
+  FindNeighbors(
+    dims = seq_along(combined_srt[["pca"]]@stdev),
+    k.param = 20,
+    annoy.metric = "euclidean",
+    n.trees = 100,
+    verbose = FALSE
+  ) |>
+  RunUMAP(
+    dims = seq_along(combined_srt[["pca"]]@stdev),
+    reduction.name = "umap",
+    reduction.key = "UMAP_",
+    return.model = TRUE,
+    umap.method = "umap-learn",
+    densmap = TRUE,
+    dens.lambda = 1L,
+    dens.frac = 0.1,
+    n.epochs = 1000L,
+    n.neighbors = 20L,
+    min.dist = 0.01,
+    spread = 4L,
+    metric = "correlation",
+    init = "pca",
+    seed.use = reseed,
+    verbose = FALSE
+  )
+```
+
+Plot by source after clean up
+-----------------------------
+
+```{r pl-umap-batch, fig.align='center', fig.width=9, fig.asp = 0.618}
+pl_emb_comb_batch <- DimPlot_scCustom(
+  seurat_object = combined_srt,
+  reduction = "umap",
+  group.by = "orig.ident",
+  pt.size = 3,
+  ggplot_default_colors = TRUE,
+  color_seed = reseed,
+  shuffle = TRUE,
+  seed = reseed,
+  repel = TRUE,
+  label = TRUE,
+  label.size = 5
+) + NoLegend()
+pl_emb_comb_batch
+```
+
+Clustering tree {.tabset}
+---------------
+
+### Standard
+
+Coloured by clustering resolution.
+
+```{r pl-clustree, fig.width=10, fig.asp=1.618}
+invisible(gc())
+set.seed(reseed)
+
+metadata <- combined_srt@meta.data
+rownames(metadata) <- colnames(combined_srt)
+ref_labels <- metadata$k_tree
+
+resolutions <-
+  modularity_event_sampling(
+    A = combined_srt@graphs$SCT_snn,
+    n.res = 10,
+    gamma.min = 1,
+    gamma.max = 4.000001
+  ) # sample based on the similarity matrix
+
+invisible(gc())
+set.seed(reseed)
+
+# clustering using Suerat
+combined_srt <- combined_srt %>%
+  FindClusters(
+    algorithm = "leiden",
+    partition.type = "ModularityVertexPartition",
+    method = "igraph",
+    n.iter = -1,
+    resolution = resolutions,
+    random.seed = reseed,
+    verbose = FALSE
+  )
+
+# initial cluster tree from Seurat flat clustering
+plot_clustree(
+  labelmat = combined_srt@meta.data,
+  prefix = "SCT_snn_res.",
+  ref_labels = ref_labels,
+  plot.ref = FALSE,
+  layout = "sugiyama",
+  use_core_edges = FALSE
+)
+```
+
+### Stability
+
+Coloured by the SC3 stability metric.
+
+```{r clustree-stability}
+plot_clustree(
+  labelmat = combined_srt@meta.data,
+  prefix = "SCT_snn_res.",
+  node_colour = "sc3_stability",
+  plot.ref = FALSE,
+  layout = "sugiyama",
+  use_core_edges = FALSE
+)
+```
+
+### Genes {.tabset}
+
+Coloured by the expression of known marker genes.
+
+```{r clustree-genes, results = "hide"}
+src_list <- map(genes.embed, function(gene) {
+  src <- c(
+    "#### {{gene}} {.unnumbered}",
+    "```{r clustree-{{gene}}}",
+    "clustree(combined_srt, node_colour = '{{gene}}',",
+            "node_colour_aggr = 'mean', exprs = 'scale.data') +",
+    "scale_colour_viridis_c(option = 'plasma', begin = 0.3)",
+    "```",
+    "")
+    knitr::knit_expand(text = src)
+})
+
+out <- knitr::knit_child(text = unlist(src_list), options = list(cache = FALSE))
+```
+
+`r out`
+
+Reconcile clustering tree {.tabset}
+-------------------------
+
+### MRTree
+
+```{r pl-mrtree, fig.height=6, fig.width=11, echo=TRUE, include=FALSE}
+out <- mrtree(
+  combined_srt,
+  prefix = "SCT_snn_res.",
+  n.cores = n_cores,
+  consensus = FALSE,
+  sample.weighted = TRUE,
+  augment.path = FALSE,
+  verbose = FALSE
+)
+# weight per sample is encoraged if the classes are imbalanced
+
+plot_tree(
+  labelmat = out$labelmat.mrtree,
+  ref.labels = if (n_unique(ref_labels) != 1) ref_labels else combined_srt$seurat_clusters,
+  plot.piechart = TRUE,
+  node.size = 0.2,
+  tip.label.dist = 10,
+  bottom.margin = 30
+)
+```
+
+### Adjusted Multiresolution Rand Index (AMRI)
+
+```{r pl-clustering-amri, fig.align='center', fig.width=4, fig.asp = 0.618}
+# Adjusted Multiresolution Rand Index (AMRI)
+ks_flat <- apply(
+  out$labelmat.flat,
+  2,
+  FUN = function(x) {
+    length(unique(x))
+  }
+)
+ks_mrtree <- apply(
+  out$labelmat.mrtree,
+  2,
+  FUN = function(x) {
+    length(unique(x))
+  }
+)
+amri_flat <- sapply(seq_len(ncol(out$labelmat.flat)), function(i) {
+  AMRI(out$labelmat.flat[, i], ref_labels)$amri
+})
+amri_flat <- aggregate(amri_flat, by = list(k = ks_flat), FUN = mean)
+amri_recon <- sapply(seq_len(ncol(out$labelmat.mrtree)), function(i) {
+  AMRI(out$labelmat.mrtree[, i], ref_labels)$amri
+})
+
+df <- rbind(
+  data.frame(
+    k = amri_flat$k,
+    amri = amri_flat$x,
+    method = "Seurat flat"
+  ),
+  data.frame(k = ks_mrtree, amri = amri_recon, method = "MRtree")
+)
+ggplot2::ggplot(data = df, aes(x = k, y = amri, color = method)) +
+  geom_line() +
+  theme_bw()
+```
+
+### Stability
+
+```{r pl-clustering-resolution, fig.align='center', fig.width=4, fig.asp = 0.618}
+stab_out <- stability_plot(out)
+stab_out$plot
+```
+
+```{r select-resolution}
+kable_material(
+  kable(
+    stab_out$df,
+    "html"
+  ),
+  bootstrap_options = c(
+    "bordered",
+    "condensed",
+    "responsive",
+    "striped"
+  ),
+  position = "left",
+  font_size = 14
+)
+
+res_k <- select_resolution(stab_out$df)
+
+kable_material(
+  kable(
+    table(
+      out$labelmat.mrtree[, which.min(
+        abs(as.integer(
+          str_remove(dimnames(
+            out$labelmat.mrtree
+          )[[2]], "K")
+        ) - res_k)
+      )]
+    ),
+    "html"
+  ),
+  bootstrap_options = c(
+    "bordered",
+    "condensed",
+    "responsive",
+    "striped"
+  ),
+  position = "left",
+  font_size = 14
+)
+```
+
+Selected clustering resolution
+------------------------------
+
+```{r pl-clustering, fig.align='center', fig.width=9, fig.asp = 0.309}
+combined_srt$k_tree <- out$labelmat.mrtree[, which.min(
+  abs(as.integer(
+    str_remove(dimnames(
+      out$labelmat.mrtree
+    )[[2]], "K")
+  ) - res_k)
+)] %>%
+  as.numeric() %>%
+  as.factor()
+p1 <-
+  DimPlot_scCustom(
+    combined_srt,
+    pt.size = 3,
+    ggplot_default_colors = TRUE,
+    color_seed = reseed,
+    shuffle = TRUE,
+    seed = reseed,
+    repel = TRUE,
+    label = TRUE,
+    label.size = 5
+  ) + ggtitle("Unsupervised overclustering") + NoLegend()
+p2 <-
+  DimPlot_scCustom(
+    combined_srt,
+    group.by = "k_tree",
+    pt.size = 3,
+    ggplot_default_colors = TRUE,
+    color_seed = reseed,
+    shuffle = TRUE,
+    seed = reseed,
+    repel = TRUE,
+    label = TRUE,
+    label.size = 5
+  ) + ggtitle("MRTree") + NoLegend()
+
+p1 | p2
+```
+
+UMAP plot of gene expression {.tabset}
+----------------------------
+
+```{r expression, results = "hide"}
+src_list <- map(genes.embed, function(gene) {
+  src <- c(
+    "### {{gene}} {.unnumbered}",
+    "```{r pl-umap-expression-{{gene}}}",
+    "FeaturePlot_scCustom(",
+      "seurat_object = combined_srt, features = '{{gene}}',",
+      "pt.size = 2, order = TRUE,",
+      "colors_use = combined_srt@misc$expr_Colour_Pal,",
+      "alpha_na_exp = 0.1, alpha_exp = 0.45) +",
+      "ggtitle(sprintf('%s: ', '{{gene}}')) +",
+      "theme(plot.title = element_text(size = 24))",
+    "```",
+    "")
+  knitr::knit_expand(text = src)
+})
+
+out <- knitr::knit_child(text = unlist(src_list), options = list(cache = FALSE))
+```
+
+`r out`
+
+Dot-plot of gene expression {.tabset}
+---------------------------
+
+### Literature-based astrocytes markers {.tabset}
+
+#### SCT
+
+```{r pl-jj-dotplot-sct, fig.asp=.618, fig.width=16}
+DotPlot_scCustom(
+  seurat_object = combined_srt,
+  assay = "SCT",
+  features = genes.jj,
+  flip_axes = TRUE,
+  x_lab_rotate = TRUE,
+  colors_use = viridis(n = 30, alpha = .55, direction = -1, option = "G")
+)
+```
+
+#### RNA
+
+```{r pl-jj-dotplot-rna, fig.asp=.618, fig.width=16}
+DotPlot_scCustom(
+  seurat_object = combined_srt,
+  assay = "RNA",
+  features = genes.jj,
+  flip_axes = TRUE,
+  x_lab_rotate = TRUE,
+  colors_use = viridis(n = 30, alpha = .55, direction = -1, option = "E")
+)
+```
+
+### IHC-based astrocytes markers {.tabset}
+
+#### SCT
+
+```{r pl-ajj-dotplot-sct, fig.asp=.618, fig.width=16}
+DotPlot_scCustom(
+  seurat_object = combined_srt,
+  assay = "SCT",
+  features = genes.anatomy.jj,
+  flip_axes = TRUE,
+  x_lab_rotate = TRUE,
+  colors_use = viridis(n = 30, alpha = .55, direction = -1, option = "G")
+)
+```
+
+#### RNA
+
+```{r pl-ajj-dotplot-rna, fig.asp=.618, fig.width=16}
+DotPlot_scCustom(
+  seurat_object = combined_srt,
+  assay = "RNA",
+  features = genes.anatomy.jj,
+  flip_axes = TRUE,
+  x_lab_rotate = TRUE,
+  colors_use = viridis(n = 30, alpha = .55, direction = -1, option = "E")
+)
+```
+
+### Astrocytes markers checked in Romanov et al., 2020 {.tabset}
+
+#### SCT
+
+```{r pl-nature-dotplot-sct, fig.asp=.618, fig.width=16}
+DotPlot_scCustom(
+  seurat_object = combined_srt,
+  assay = "SCT",
+  features = unique(genes.nature),
+  flip_axes = TRUE,
+  x_lab_rotate = TRUE,
+  colors_use = viridis(n = 30, alpha = .55, direction = -1, option = "G")
+)
+```
+
+#### RNA
+
+```{r pl-nature-dotplot-rna, fig.asp=.618, fig.width=16}
+DotPlot_scCustom(
+  seurat_object = combined_srt,
+  assay = "RNA",
+  features = unique(genes.nature),
+  flip_axes = TRUE,
+  x_lab_rotate = TRUE,
+  colors_use = viridis(n = 30, alpha = .55, direction = -1, option = "E")
+)
+```
+
+Differential gene expression (DGE) {.tabset}
+----------------------------------
+
+We see the spread of our targets across derived clusters, which isn't optimal. Lets see if we will see some significant hits with proper statistical testing.
+
+```{r markers-tables}
+invisible(gc())
+set.seed(reseed)
+
+Idents(combined_srt) <- "k_tree"
+combined_srt <-
+  PrepSCTFindMarkers(combined_srt, assay = "SCT")
+```
+
+### logistic regression {.tabset}
+
+```{r markers-logreg}
+markers_logreg <-
+  FindAllMarkers(
+    combined_srt,
+    assay = "SCT",
+    verbose = FALSE,
+    random.seed = reseed,
+    only.pos = TRUE,
+    min.pct = 0.2,
+    base = 10,
+    logfc.threshold = 0.2,
+    densify = TRUE,
+    test.use = "LR"
+  )
+write_csv(
+  markers_logreg,
+  here(
+    tables_dir,
+    docname,
+    sprintf("%s_all_mrk-logreg_sct-combined-whole_dataset-nc.csv",
+            project)
+  )
+)
+
+markers_logreg %>%
+  group_by(cluster) %>%
+  slice_max(n = 20, order_by = avg_log10FC) %>%
+  kable("html") %>%
+  kable_material(
+    bootstrap_options = c(
+      "bordered",
+      "condensed",
+      "responsive",
+      "striped"
+    ),
+    position = "left",
+    font_size = 14
+  )
+```
+
+```{r include=FALSE, fig.align='center', fig.height=10, fig.width=10}
+invisible(gc())
+set.seed(reseed)
+
+top5_markers <-
+  Extract_Top_Markers(
+    marker_dataframe = markers_logreg,
+    num_genes = 5,
+    named_vector = FALSE,
+    make_unique = TRUE,
+    rank_by = "avg_log10FC"
+  )
+
+pl_clst_dotplot <-
+  try(
+    {
+      Clustered_DotPlot(
+        seurat_object = combined_srt,
+        features = top5_markers,
+        k = length(levels(combined_srt)),
+        ggplot_default_colors = TRUE,
+        color_seed = reseed,
+        seed = reseed
+      )
+    },
+    silent = TRUE
+  )
+
+
+# markers
+Iterate_FeaturePlot_scCustom(
+  seurat_object = combined_srt,
+  gene_list = top5_markers,
+  single_pdf = TRUE,
+  colors_use = viridis(
+    n = 30,
+    alpha = .55,
+    direction = -1,
+    option = "E"
+  ),
+  pt.size = 3,
+  alpha_exp = 0.45,
+  alpha_na_exp = 0.1,
+  file_path = here(plots_dir),
+  file_name = "/combined-top5_logreg-umap-whole_dataset-nc",
+  file_type = ".pdf"
+)
+# stress
+Iterate_FeaturePlot_scCustom(
+  seurat_object = combined_srt,
+  gene_list = stress_genes,
+  single_pdf = TRUE,
+  colors_use = viridis(
+    n = 30,
+    alpha = .55,
+    direction = -1,
+    option = "E"
+  ),
+  pt.size = 3,
+  alpha_exp = 0.45,
+  alpha_na_exp = 0.1,
+  file_path = here(plots_dir),
+  file_name = "/combined-stress-umap-whole_dataset-nc",
+  file_type = ".pdf"
+)
+# sex
+Iterate_FeaturePlot_scCustom(
+  seurat_object = combined_srt,
+  gene_list = sex_genes,
+  single_pdf = TRUE,
+  colors_use = viridis(
+    n = 30,
+    alpha = .55,
+    direction = -1,
+    option = "E"
+  ),
+  pt.size = 3,
+  alpha_exp = 0.45,
+  alpha_na_exp = 0.1,
+  file_path = here(plots_dir),
+  file_name = "/combined-sex-umap-whole_dataset-nc",
+  file_type = ".pdf"
+)
+# jj
+Iterate_FeaturePlot_scCustom(
+  seurat_object = combined_srt,
+  gene_list = genes.jj,
+  single_pdf = TRUE,
+  colors_use = viridis(
+    n = 30,
+    alpha = .55,
+    direction = -1,
+    option = "E"
+  ),
+  pt.size = 3,
+  alpha_exp = 0.45,
+  alpha_na_exp = 0.1,
+  file_path = here(plots_dir),
+  file_name = "/combined-jj-umap-whole_dataset-nc",
+  file_type = ".pdf"
+)
+# anatomy jj
+Iterate_FeaturePlot_scCustom(
+  seurat_object = combined_srt,
+  gene_list = genes.anatomy.jj,
+  single_pdf = TRUE,
+  colors_use = viridis(
+    n = 30,
+    alpha = .55,
+    direction = -1,
+    option = "E"
+  ),
+  pt.size = 3,
+  alpha_exp = 0.45,
+  alpha_na_exp = 0.1,
+  file_path = here(plots_dir),
+  file_name = "/combined-anatomy_jj-umap-whole_dataset-nc",
+  file_type = ".pdf"
+)
+# astro
+Iterate_FeaturePlot_scCustom(
+  seurat_object = combined_srt,
+  gene_list = genes.embed,
+  single_pdf = TRUE,
+  colors_use = viridis(
+    n = 30,
+    alpha = .55,
+    direction = -1,
+    option = "E"
+  ),
+  pt.size = 3,
+  alpha_exp = 0.45,
+  alpha_na_exp = 0.1,
+  file_path = here(plots_dir),
+  file_name = "/combined-probes-umap-whole_dataset-nc",
+  file_type = ".pdf"
+)
+# nature astro
+Iterate_FeaturePlot_scCustom(
+  seurat_object = combined_srt,
+  gene_list = unique(genes.nature),
+  single_pdf = TRUE,
+  colors_use = viridis(
+    n = 30,
+    alpha = .55,
+    direction = -1,
+    option = "E"
+  ),
+  pt.size = 3,
+  alpha_exp = 0.45,
+  alpha_na_exp = 0.1,
+  file_path = here(plots_dir),
+  file_name = "/combined-nature-umap-whole_dataset-nc",
+  file_type = ".pdf"
+)
+# np receptors
+Iterate_FeaturePlot_scCustom(
+  seurat_object = combined_srt,
+  gene_list = npr,
+  single_pdf = TRUE,
+  colors_use = viridis(
+    n = 30,
+    alpha = .55,
+    direction = -1,
+    option = "E"
+  ),
+  pt.size = 3,
+  alpha_exp = 0.45,
+  alpha_na_exp = 0.1,
+  file_path = here(plots_dir),
+  file_name = "/combined-npr-umap-whole_dataset-nc",
+  file_type = ".pdf"
+)
+```
+
+#### Dot-plot
+```{r pl-clst-dotplot-logreg, echo=FALSE, fig.align='center', fig.height=10, fig.width=10}
+if (class(pl_clst_dotplot) != "try-error") pl_clst_dotplot[[2]]
+```
+
+#### Heatmap
+
+```{r pl-heatmap-logreg, fig.width = 18, fig.asp = 1.33}
+top10 <-
+  markers_logreg %>%
+  group_by(cluster) %>%
+  top_n(n = 10, wt = avg_log10FC)
+DoHeatmap(combined_srt, features = top10$gene) + NoLegend()
+```
+
+### MAST {.tabset}
+
+```{r markers-MAST}
+invisible(gc())
+set.seed(reseed)
+
+markers_MAST <-
+  FindAllMarkers(
+    combined_srt,
+    assay = "RNA",
+    verbose = FALSE,
+    random.seed = reseed,
+    only.pos = TRUE,
+    min.pct = 0.1,
+    base = 10,
+    logfc.threshold = 0.2,
+    test.use = "MAST"
+  )
+write_csv(
+  markers_MAST,
+  here(
+    tables_dir,
+    docname,
+    sprintf(
+      "%s_all_mrk-MAST_sct-combined-whole_dataset-nc.csv",
+      project)
+  )
+)
+markers_MAST %>%
+  group_by(cluster) %>%
+  slice_max(n = 20, order_by = avg_log10FC) %>%
+  kable("html") %>%
+  kable_material(
+    bootstrap_options = c(
+      "bordered",
+      "condensed",
+      "responsive",
+      "striped"
+    ),
+    position = "left",
+    font_size = 14
+  )
+```
+
+```{r include=FALSE, fig.align='center', fig.height=10, fig.width=10}
+invisible(gc())
+set.seed(reseed)
+
+top5_markers <-
+  Extract_Top_Markers(
+    marker_dataframe = markers_MAST,
+    num_genes = 5,
+    named_vector = FALSE,
+    make_unique = TRUE,
+    rank_by = "avg_log10FC"
+  )
+
+pl_clst_dotplot <-
+  try(
+    {
+      Clustered_DotPlot(
+        seurat_object = combined_srt,
+        features = top5_markers,
+        k = length(levels(combined_srt)),
+        ggplot_default_colors = TRUE,
+        color_seed = reseed,
+        seed = reseed
+      )
+    },
+    silent = TRUE
+  )
+
+# markers
+Iterate_FeaturePlot_scCustom(
+  seurat_object = combined_srt,
+  gene_list = top5_markers,
+  single_pdf = TRUE,
+  colors_use = viridis(
+    n = 30,
+    alpha = .55,
+    direction = -1,
+    option = "E"
+  ),
+  pt.size = 3,
+  alpha_exp = 0.45,
+  alpha_na_exp = 0.1,
+  file_path = here(plots_dir),
+  file_name = "/combined-top5_MAST-umap-whole_dataset-nc",
+  file_type = ".pdf"
+)
+```
+
+#### Dot-plot
+```{r pl-clst-dotplot-MAST, echo=FALSE, fig.align='center', fig.height=10, fig.width=10}
+if (class(pl_clst_dotplot) != "try-error") pl_clst_dotplot[[2]]
+```
+
+#### Heatmap
+
+```{r pl-heatmap-MAST, fig.width = 18, fig.asp = 1.33}
+top10 <-
+  markers_logreg %>%
+  group_by(cluster) %>%
+  top_n(n = 10, wt = avg_log10FC)
+DoHeatmap(combined_srt, features = top10$gene) + NoLegend()
+```
+
+# Summary
+
+## Parameters
+
+This table describes parameters used and set in this document.
+
+```{r parameters}
+params <- list(
+  list(
+    Parameter = "high_cutoff_umis",
+    Value = high_cutoff_umis,
+    Description = "Maximum threshold for total counts"
+  ),
+  list(
+    Parameter = "low_cutoff_gene",
+    Value = low_cutoff_gene,
+    Description = "Minimum threshold for total features"
+  ),
+  list(
+    Parameter = "high_cutoff_gene",
+    Value = high_cutoff_gene,
+    Description = "Maximum threshold for total features"
+  ),
+  list(
+    Parameter = "high_cutoff_pc_mt",
+    Value = high_cutoff_pc_mt,
+    Description = "Maximum threshold for percentage counts mitochondrial"
+  ),
+  list(
+    Parameter = "high_cutoff_pc_ribo",
+    Value = high_cutoff_pc_ribo,
+    Description = "Maximum threshold for percentage counts ribosomal"
+  ),
+  list(
+    Parameter = "high_cutoff_pc_hb",
+    Value = high_cutoff_pc_hb,
+    Description = "Maximum threshold for percentage counts hemoglobin"
+  ),
+  list(
+    Parameter = "high_cutoff_complexity",
+    Value = high_cutoff_complexity,
+    Description = "Maximum threshold for cells complexity"
+  ),
+  list(
+    Parameter = "n_cells",
+    Value = ncol(combined_srt),
+    Description = "Number of cells in the filtered dataset"
+  ),
+  list(
+    Parameter = "n_genes",
+    Value = nrow(combined_srt),
+    Description = "Number of genes in the filtered dataset"
+  ),
+  list(
+    Parameter = "median_genes",
+    Value = median(Matrix::colSums(GetAssayData(
+      combined_srt, slot = "counts", assay = "RNA") != 0)),
+    Description = paste("Median number of expressed genes per cell in the",
+                        "filtered dataset")
+  ),
+  list(
+    Parameter = "median_counts",
+    Value = median(Matrix::colSums(GetAssayData(
+      combined_srt, slot = "counts", assay = "RNA"))),
+    Description = paste(
+      "Median number of counts per cell in the filtered",
+      "dataset"
+    )
+  ),
+  unlist(purrr::map(srr_set, n_cells_per_file))
+)
+params <- jsonlite::toJSON(params, pretty = TRUE)
+knitr::kable(jsonlite::fromJSON(params))
+```
+
+## Output files
+
+This table describes the output files produced by this document. Right click and *Save Link As...* to download the results.
+
+```{r save-dataset}
+SaveH5Seurat(
+  combined_srt,
+  filename = here(
+    data_dir,
+    sprintf("%s-whole_dataset-nc-clusters.h5Seurat", bioproject)
+  ),
+  overwrite = TRUE
+)
+```
+
+```{r output-cells, results = "hide"}
+dir.create(here(tables_dir, docname), showWarnings = FALSE)
+for (sample in unique(combined_srt@meta.data$orig.ident)) {
+  cells <- combined_srt@meta.data %>%
+    as.data.frame() %>%
+    filter(orig.ident == sample) %>%
+    select(cell_name)
+
+  readr::write_tsv(cells,
+    print(here(
+      tables_dir, docname,
+      glue::glue("cell_names-{sample}.tsv")
+    )),
+    col_names = FALSE
+  )
+}
+```
+
+```{r output}
+readr::write_lines(params, here(tables_dir, docname, "parameters.json"))
+knitr::kable(data.frame(
+  File = c(
+    get_download_link("parameters.json", here(tables_dir, docname)),
+    purrr::map_chr(
+      srr_set,
+      ~get_download_link(file = sprintf("cell_names-%s.tsv", .x),
+                        folder = here(tables_dir, docname))),
+    get_download_link(sprintf(
+      "%s_all_mrk-logreg_sct-combined-whole_dataset-nc.csv",
+      project), here(tables_dir, docname)),
+    get_download_link(sprintf(
+      "%s_all_mrk-MAST_sct-combined-whole_dataset-nc.csv",
+      project), here(tables_dir, docname)),
+    get_download_link(
+      "combined-top5_logreg-umap-whole_dataset-nc.pdf", plots_dir),
+    get_download_link(
+      "combined-top5_MAST-umap-whole_dataset-nc.pdf", plots_dir
+    )
+  ),
+  Description = c(
+    "Parameters set and used in this analysis",
+    purrr::map_chr(srr_set, ~sprintf("cell_names-%s.tsv", .x)),
+    "DGE with logreg test",
+    "DGE with MAST test",
+    "UMAP embeddings of top5 genes per cluster from logreg test",
+    "UMAP embeddings of top5 genes per cluster from MAST test"
+  )
+))
+```

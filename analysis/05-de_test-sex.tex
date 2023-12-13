@@ -1,0 +1,908 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrartcl}
+
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+% Make \paragraph and \subparagraph free-standing
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\makeatletter
+\@ifpackageloaded{tcolorbox}{}{\usepackage[many]{tcolorbox}}
+\makeatother
+\makeatletter
+\@ifundefined{shadecolor}{\definecolor{shadecolor}{rgb}{.97, .97, .97}}
+\makeatother
+\makeatletter
+\makeatother
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Differential expression analysis between sex of Hypothalamus astrocytes dataset from Romanov RA et al 2020},
+  pdfauthor={Evgenii O. Tretiakov},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Differential expression analysis between sex of Hypothalamus
+astrocytes dataset from Romanov RA et al 2020}
+\author{Evgenii O. Tretiakov}
+\date{6/28/23}
+
+\begin{document}
+\maketitle
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[interior hidden, enhanced, sharp corners, borderline west={3pt}{0pt}{shadecolor}, breakable, boxrule=0pt, frame hidden]}{\end{tcolorbox}}\fi
+
+\hypertarget{load-data-and-setup-parameters}{%
+\subsection{Load data and setup
+parameters}\label{load-data-and-setup-parameters}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Load tidyverse infrastructure packages}
+\FunctionTok{suppressPackageStartupMessages}\NormalTok{(\{}
+  \FunctionTok{library}\NormalTok{(future)}
+  \FunctionTok{library}\NormalTok{(here)}
+  \FunctionTok{library}\NormalTok{(tidyverse)}
+  \FunctionTok{library}\NormalTok{(magrittr)}
+  \FunctionTok{library}\NormalTok{(stringr)}
+  \FunctionTok{library}\NormalTok{(skimr)}
+  \FunctionTok{library}\NormalTok{(RColorBrewer)}
+  \FunctionTok{library}\NormalTok{(viridis)}
+\NormalTok{\})}
+
+
+\CommentTok{\# Load packages for scRNA{-}seq analysis and visualisation}
+\FunctionTok{suppressPackageStartupMessages}\NormalTok{(\{}
+  \FunctionTok{library}\NormalTok{(ggplot2)}
+  \FunctionTok{library}\NormalTok{(cowplot)}
+  \FunctionTok{library}\NormalTok{(patchwork)}
+  \FunctionTok{library}\NormalTok{(ggstatsplot)}
+  \FunctionTok{library}\NormalTok{(anndata)}
+  \FunctionTok{library}\NormalTok{(sceasy)}
+  \FunctionTok{library}\NormalTok{(Seurat)}
+  \FunctionTok{library}\NormalTok{(SeuratDisk)}
+  \FunctionTok{library}\NormalTok{(SeuratWrappers)}
+  \FunctionTok{library}\NormalTok{(scCustomize)}
+\NormalTok{\})}
+
+\NormalTok{sc }\OtherTok{\textless{}{-}} \FunctionTok{import}\NormalTok{(}\StringTok{"scanpy"}\NormalTok{, }\AttributeTok{convert =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{set-paths}{%
+\subsubsection{Set paths}\label{set-paths}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{src\_dir }\OtherTok{\textless{}{-}} \FunctionTok{here}\NormalTok{(}\StringTok{"code"}\NormalTok{)}
+\NormalTok{data\_dir }\OtherTok{\textless{}{-}} \FunctionTok{here}\NormalTok{(}\StringTok{"../data"}\NormalTok{)}
+\NormalTok{output\_dir }\OtherTok{\textless{}{-}} \FunctionTok{here}\NormalTok{(}\StringTok{"output"}\NormalTok{)}
+\NormalTok{plots\_dir }\OtherTok{\textless{}{-}} \FunctionTok{here}\NormalTok{(output\_dir, }\StringTok{"figures"}\NormalTok{)}
+\NormalTok{tables\_dir }\OtherTok{\textless{}{-}} \FunctionTok{here}\NormalTok{(output\_dir, }\StringTok{"tables"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{load-helper-functions-and-gene-sets}{%
+\subsubsection{Load helper functions and
+gene-sets}\label{load-helper-functions-and-gene-sets}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{source}\NormalTok{(}\FunctionTok{here}\NormalTok{(src\_dir, }\StringTok{"genes.R"}\NormalTok{))}
+\FunctionTok{source}\NormalTok{(}\FunctionTok{here}\NormalTok{(src\_dir, }\StringTok{"functions.R"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{set-fixed-variables}{%
+\subsubsection{Set fixed variables}\label{set-fixed-variables}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# set seed}
+\NormalTok{reseed }\OtherTok{\textless{}{-}} \DecValTok{42}
+\FunctionTok{set.seed}\NormalTok{(}\AttributeTok{seed =}\NormalTok{ reseed)}
+
+\CommentTok{\# Parameters for parallel execution}
+\NormalTok{n\_cores }\OtherTok{\textless{}{-}} \DecValTok{32}
+\FunctionTok{plan}\NormalTok{(}\StringTok{"multisession"}\NormalTok{, }\AttributeTok{workers =}\NormalTok{ n\_cores)}
+\FunctionTok{options}\NormalTok{(}
+  \AttributeTok{future.globals.maxSize =} \DecValTok{100000} \SpecialCharTok{*} \DecValTok{1024}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{,}
+  \AttributeTok{future.rng.onMisuse =} \StringTok{"ignore"}
+\NormalTok{)}
+\FunctionTok{plan}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+multisession:
+- args: function (..., workers = 32, envir = parent.frame())
+- tweaked: TRUE
+- call: plan("multisession", workers = n_cores)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# ggplot2 theme}
+\FunctionTok{theme\_set}\NormalTok{(ggmin}\SpecialCharTok{::}\FunctionTok{theme\_powerpoint}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bioproject }\OtherTok{\textless{}{-}} \StringTok{"PRJNA548917"}
+\NormalTok{project }\OtherTok{\textless{}{-}} \StringTok{"romanov2020\_Hypoth{-}dev"}
+\NormalTok{cb\_fpr }\OtherTok{\textless{}{-}} \FloatTok{0.001}
+\NormalTok{low\_cutoff\_gene }\OtherTok{\textless{}{-}} \DecValTok{500}
+\NormalTok{high\_cutoff\_gene }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
+\NormalTok{high\_cutoff\_gene }\OtherTok{\textless{}{-}} \DecValTok{6000}
+\NormalTok{low\_cutoff\_umis }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
+\NormalTok{low\_cutoff\_umis }\OtherTok{\textless{}{-}} \SpecialCharTok{{-}}\ConstantTok{Inf}
+\NormalTok{high\_cutoff\_umis }\OtherTok{\textless{}{-}} \DecValTok{20000}
+\NormalTok{high\_cutoff\_pc\_mt }\OtherTok{\textless{}{-}} \DecValTok{15}
+\NormalTok{high\_cutoff\_pc\_ribo }\OtherTok{\textless{}{-}} \DecValTok{15}
+\NormalTok{high\_cutoff\_pc\_hb }\OtherTok{\textless{}{-}} \FloatTok{0.1}
+\NormalTok{high\_cutoff\_doublet\_score }\OtherTok{\textless{}{-}} \FloatTok{0.33}
+\NormalTok{high\_cutoff\_complexity }\OtherTok{\textless{}{-}} \FloatTok{0.85}
+\NormalTok{connectivity\_model }\OtherTok{\textless{}{-}} \StringTok{"min\_tree"}
+\NormalTok{k }\OtherTok{\textless{}{-}} \DecValTok{10}
+\NormalTok{metric }\OtherTok{\textless{}{-}} \StringTok{"euclidean"}
+\NormalTok{signature }\OtherTok{\textless{}{-}} \DecValTok{100}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{load-predicted-astrocytes-data-and-subset-from-romanov-ra-et-al-2020}{%
+\subsection{Load predicted astrocytes data and subset from Romanov RA et
+al
+2020}\label{load-predicted-astrocytes-data-and-subset-from-romanov-ra-et-al-2020}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{srt\_path }\OtherTok{\textless{}{-}} \FunctionTok{here}\NormalTok{(}
+\NormalTok{  data\_dir,}
+  \FunctionTok{sprintf}\NormalTok{(}\StringTok{"resolved\_subregions\_by\_microclusters/best\_xgboost{-}subregional\_\%s{-}astrocytes\_dataset{-}msp\_\%s{-}metric\_\%s{-}k\_\%s{-}sign\_\%s{-}amb\_\%s.h5Seurat"}\NormalTok{, bioproject, connectivity\_model, metric, k, signature, cb\_fpr)}
+\NormalTok{)}
+\NormalTok{srt }\OtherTok{\textless{}{-}} \FunctionTok{LoadH5Seurat}\NormalTok{(}\AttributeTok{file =}\NormalTok{ srt\_path)}
+\FunctionTok{Idents}\NormalTok{(srt) }\OtherTok{\textless{}{-}} \StringTok{"predict\_xgboost\_subregion"}
+\FunctionTok{print}\NormalTok{(srt)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+An object of class Seurat 
+21989 features across 3042 samples within 1 assay 
+Active assay: RNA (21989 features, 0 variable features)
+ 2 dimensional reductions calculated: densmap_logit, densmap_xgboost
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{srt }\OtherTok{\textless{}{-}} \FunctionTok{NormalizeData}\NormalTok{(srt)}
+\NormalTok{srt }\OtherTok{\textless{}{-}} \FunctionTok{FindVariableFeatures}\NormalTok{(srt, }\AttributeTok{selection.method =} \StringTok{"vst"}\NormalTok{, }\AttributeTok{nfeatures =} \DecValTok{3000}\NormalTok{)}
+\NormalTok{all.genes }\OtherTok{\textless{}{-}} \FunctionTok{rownames}\NormalTok{(srt)}
+\NormalTok{srt }\OtherTok{\textless{}{-}} \FunctionTok{ScaleData}\NormalTok{(srt, }\AttributeTok{features =}\NormalTok{ all.genes)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create sex{-}related gene sets}
+\NormalTok{male\_genes }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Eif2s3y"}\NormalTok{, }\StringTok{"Ddx3y"}\NormalTok{, }\StringTok{"Uty"}\NormalTok{, }\StringTok{"Kdm5d"}\NormalTok{, }\StringTok{"Zfy"}\NormalTok{, }\StringTok{"Rps4y1"}\NormalTok{, }\StringTok{"Rps4y2"}\NormalTok{, }\StringTok{"Sry"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ .[. }\SpecialCharTok{\%in\%} \FunctionTok{rownames}\NormalTok{(srt)]}
+\NormalTok{female\_genes }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Tsix"}\NormalTok{, }\StringTok{"Xist"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ .[. }\SpecialCharTok{\%in\%} \FunctionTok{rownames}\NormalTok{(srt)]}
+
+\CommentTok{\# Add module scores for male and female gene sets}
+\NormalTok{srt }\OtherTok{\textless{}{-}} \FunctionTok{AddModuleScore}\NormalTok{(}
+\NormalTok{  srt,}
+  \AttributeTok{features =}\NormalTok{ male\_genes,}
+  \AttributeTok{name =} \StringTok{"Male\_score"}
+\NormalTok{)}
+
+\NormalTok{srt }\OtherTok{\textless{}{-}} \FunctionTok{AddModuleScore}\NormalTok{(}
+\NormalTok{  srt,}
+  \AttributeTok{features =}\NormalTok{ female\_genes,}
+  \AttributeTok{name =} \StringTok{"Female\_score"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{FeaturePlot\_scCustom}\NormalTok{(}\AttributeTok{reduction =} \StringTok{"densmap\_xgboost"}\NormalTok{,}
+  \AttributeTok{na\_cutoff =} \ConstantTok{NA}\NormalTok{,}
+  \AttributeTok{pt.size =} \DecValTok{4}\NormalTok{,}
+  \AttributeTok{order =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{alpha\_na\_exp =} \FloatTok{0.1}\NormalTok{,}
+  \AttributeTok{alpha\_exp =} \FloatTok{0.35}\NormalTok{,}
+  \AttributeTok{seurat\_object =}\NormalTok{ srt,}
+  \AttributeTok{features =} \FunctionTok{c}\NormalTok{(}\StringTok{"Male\_score1"}\NormalTok{, }\StringTok{"Female\_score1"}\NormalTok{),}
+  \AttributeTok{colors\_use =}\NormalTok{ srt}\SpecialCharTok{@}\NormalTok{misc}\SpecialCharTok{$}\NormalTok{expr\_Colour\_Pal}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=43.75in,height=\textheight]{05-de_test-sex_files/figure-pdf/sex-featureplots-1.png}
+
+}
+
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{classes }\OtherTok{\textless{}{-}} \FunctionTok{levels}\NormalTok{(srt)}
+
+\NormalTok{female\_cells }\OtherTok{\textless{}{-}}
+\NormalTok{  classes }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{map}\NormalTok{(}\SpecialCharTok{\textasciitilde{}} \FunctionTok{quantile}\NormalTok{(}\FunctionTok{subset}\NormalTok{(srt, }\AttributeTok{ident =}\NormalTok{ .x)}\SpecialCharTok{$}\NormalTok{Female\_score1, }\FloatTok{0.8}\NormalTok{))}
+\NormalTok{female\_cells }\OtherTok{\textless{}{-}} \FunctionTok{simplify}\NormalTok{(female\_cells)}
+\NormalTok{female\_cells}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+80% 80% 80% 80% 80% 80% 80% 80% 
+  0   0   0   0   0   0   0   0 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{male\_cells }\OtherTok{\textless{}{-}}
+\NormalTok{  classes }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{map}\NormalTok{(}\SpecialCharTok{\textasciitilde{}} \FunctionTok{quantile}\NormalTok{(}\FunctionTok{subset}\NormalTok{(srt, }\AttributeTok{ident =}\NormalTok{ .x)}\SpecialCharTok{$}\NormalTok{Male\_score1, }\FloatTok{0.8}\NormalTok{))}
+\NormalTok{male\_cells }\OtherTok{\textless{}{-}} \FunctionTok{simplify}\NormalTok{(male\_cells)}
+\NormalTok{male\_cells}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+        80%         80%         80%         80%         80%         80% 
+-0.09627210 -0.09192773 -0.09682306 -0.08988589 -0.09665113 -0.09383678 
+        80%         80% 
+-0.09789540 -0.07873564 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{female\_cells }\OtherTok{\textless{}{-}} \FunctionTok{WhichCells}\NormalTok{(}
+  \AttributeTok{object =}\NormalTok{ srt,}
+  \AttributeTok{expression =}\NormalTok{ Female\_score1 }\SpecialCharTok{\textgreater{}=} \FunctionTok{quantile}\NormalTok{(srt}\SpecialCharTok{$}\NormalTok{Female\_score1, }\FloatTok{0.8}\NormalTok{)}
+\NormalTok{)}
+\FunctionTok{Idents}\NormalTok{(}\AttributeTok{object =}\NormalTok{ srt, }\AttributeTok{cells =}\NormalTok{ female\_cells) }\OtherTok{\textless{}{-}} \StringTok{"female"}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{male\_cells }\OtherTok{\textless{}{-}} \FunctionTok{WhichCells}\NormalTok{(}
+  \AttributeTok{object =}\NormalTok{ srt,}
+  \AttributeTok{expression =}\NormalTok{ Male\_score1 }\SpecialCharTok{\textgreater{}=} \FunctionTok{quantile}\NormalTok{(srt}\SpecialCharTok{$}\NormalTok{Male\_score1, }\FloatTok{0.8}\NormalTok{)}
+\NormalTok{)}
+\FunctionTok{Idents}\NormalTok{(}\AttributeTok{object =}\NormalTok{ srt, }\AttributeTok{cells =}\NormalTok{ male\_cells) }\OtherTok{\textless{}{-}} \StringTok{"male"}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{srt }\OtherTok{\textless{}{-}} \FunctionTok{subset}\NormalTok{(}\AttributeTok{x =}\NormalTok{ srt, }\AttributeTok{idents =} \FunctionTok{c}\NormalTok{(}\StringTok{"female"}\NormalTok{, }\StringTok{"male"}\NormalTok{))}
+\NormalTok{srt}\SpecialCharTok{$}\NormalTok{sex }\OtherTok{\textless{}{-}} \FunctionTok{Idents}\NormalTok{(srt)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{FeaturePlot\_scCustom}\NormalTok{(}\AttributeTok{reduction =} \StringTok{"densmap\_xgboost"}\NormalTok{,}
+  \AttributeTok{na\_cutoff =} \ConstantTok{NA}\NormalTok{,}
+  \AttributeTok{pt.size =} \DecValTok{4}\NormalTok{,}
+  \AttributeTok{order =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{alpha\_na\_exp =} \FloatTok{0.1}\NormalTok{,}
+  \AttributeTok{alpha\_exp =} \FloatTok{0.35}\NormalTok{,}
+  \AttributeTok{seurat\_object =}\NormalTok{ srt,}
+  \AttributeTok{features =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Cacybp"}\NormalTok{, }\StringTok{"S100a6"}\NormalTok{, }\StringTok{"S100a1"}\NormalTok{,}
+    \StringTok{"S100a12"}\NormalTok{, }\StringTok{"S100b"}\NormalTok{, }\StringTok{"S100p"}\NormalTok{,}
+    \StringTok{"S100a4"}\NormalTok{, }\StringTok{"S100a2"}\NormalTok{, }\StringTok{"S100a3"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{    .[. }\SpecialCharTok{\%in\%} \FunctionTok{rownames}\NormalTok{(srt)],}
+  \AttributeTok{split.by =} \StringTok{"sex"}\NormalTok{,}
+  \AttributeTok{colors\_use =}\NormalTok{ srt}\SpecialCharTok{@}\NormalTok{misc}\SpecialCharTok{$}\NormalTok{expr\_Colour\_Pal}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=21.875in,height=\textheight]{05-de_test-sex_files/figure-pdf/sex-featureplots-cacybp-1.png}
+
+}
+
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Run differential expression analysis between sexes}
+\NormalTok{dimred\_de }\OtherTok{\textless{}{-}}
+\NormalTok{  classes }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{map}\NormalTok{(}\SpecialCharTok{\textasciitilde{}} \FunctionTok{FindMarkers}\NormalTok{(}
+\NormalTok{    srt,}
+    \AttributeTok{ident.1 =} \StringTok{"female"}\NormalTok{,}
+    \AttributeTok{ident.2 =} \StringTok{"male"}\NormalTok{,}
+    \AttributeTok{min.pct =} \FloatTok{0.15}\NormalTok{,}
+    \AttributeTok{logfc.threshold =} \FloatTok{0.25}\NormalTok{,}
+    \AttributeTok{test.use =} \StringTok{"MAST"}\NormalTok{,}
+    \AttributeTok{only.pos =} \ConstantTok{TRUE}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{rownames\_to\_column}\NormalTok{(}\StringTok{"gene"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cluster =}\NormalTok{ .x))}
+\NormalTok{dimred\_de }\OtherTok{\textless{}{-}} \FunctionTok{reduce}\NormalTok{(dimred\_de, bind\_rows)}
+
+\CommentTok{\# Save differentially expressed genes}
+\FunctionTok{write\_csv}\NormalTok{(dimred\_de, }\FunctionTok{here}\NormalTok{(data\_dir, }\FunctionTok{sprintf}\NormalTok{(}\StringTok{"resolved\_subregions\_by\_microclusters/\%s{-}male\_vs\_female{-}de\_genes.csv"}\NormalTok{, bioproject)))}
+
+\FunctionTok{Idents}\NormalTok{(srt) }\OtherTok{\textless{}{-}} \StringTok{"predict\_xgboost\_subregion"}
+
+\NormalTok{all\_markers\_genes }\OtherTok{\textless{}{-}}\NormalTok{ dimred\_de }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(avg\_log2FC)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{distinct}\NormalTok{(gene, }\AttributeTok{.keep\_all =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(cluster)}
+\NormalTok{all\_markers\_genes2 }\OtherTok{\textless{}{-}}\NormalTok{ all\_markers\_genes }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(gene }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(npr, nmr, genes.embed, transcription\_factors)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(cluster) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(avg\_log2FC))}
+
+\NormalTok{top\_5 }\OtherTok{\textless{}{-}}\NormalTok{ all\_markers\_genes }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(cluster) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(avg\_log2FC)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{slice\_head}\NormalTok{(}\AttributeTok{n =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  .}\SpecialCharTok{$}\NormalTok{gene}
+\NormalTok{top\_30 }\OtherTok{\textless{}{-}}\NormalTok{ all\_markers\_genes }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(cluster) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(avg\_log2FC)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{slice\_head}\NormalTok{(}\AttributeTok{n =} \DecValTok{30}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  .}\SpecialCharTok{$}\NormalTok{gene}
+\NormalTok{top\_5s }\OtherTok{\textless{}{-}}\NormalTok{ all\_markers\_genes2 }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(cluster) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(avg\_log2FC)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{slice\_head}\NormalTok{(}\AttributeTok{n =} \DecValTok{5}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  .}\SpecialCharTok{$}\NormalTok{gene}
+\NormalTok{top\_30s }\OtherTok{\textless{}{-}}\NormalTok{ all\_markers\_genes2 }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(cluster) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(}\FunctionTok{desc}\NormalTok{(avg\_log2FC)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{slice\_head}\NormalTok{(}\AttributeTok{n =} \DecValTok{30}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  .}\SpecialCharTok{$}\NormalTok{gene}
+
+\NormalTok{top\_5}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] "Xist"  "Btg2"  "Csdc2" "Gm973" "Rftn2"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{top\_30}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ [1] "Xist"    "Btg2"    "Csdc2"   "Gm973"   "Rftn2"   "Tjp1"    "Sertad2"
+ [8] "Cd38"    "Rab14"   "Cpeb2"   "Atf7ip"  "Clstn1"  "Tet2"    "Shisa4" 
+[15] "Tulp3"   "Ctsb"    "Gigyf2"  "Ppib"   
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{top\_5s}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] "Sertad2" "Atf7ip" 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{top\_30s}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] "Sertad2" "Atf7ip" 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{DotPlot}\NormalTok{(}\AttributeTok{object =}\NormalTok{ srt, }\AttributeTok{features =}\NormalTok{ top\_30, }\AttributeTok{split.by =} \StringTok{"sex"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{RotatedAxis}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=43.75in,height=\textheight]{05-de_test-sex_files/figure-pdf/plt-dotplot-gene-1.png}
+
+}
+
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{DotPlot}\NormalTok{(}\AttributeTok{object =}\NormalTok{ srt, }\AttributeTok{features =}\NormalTok{ top\_30s, }\AttributeTok{split.by =} \StringTok{"sex"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{RotatedAxis}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=43.75in,height=\textheight]{05-de_test-sex_files/figure-pdf/plt-dotplot-sgenes-1.png}
+
+}
+
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{DotPlot}\NormalTok{(}
+  \AttributeTok{object =}\NormalTok{ srt,}
+  \AttributeTok{features =} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"Cacybp"}\NormalTok{, }\StringTok{"S100a6"}\NormalTok{, }\StringTok{"S100a1"}\NormalTok{,}
+    \StringTok{"S100a12"}\NormalTok{, }\StringTok{"S100b"}\NormalTok{, }\StringTok{"S100p"}\NormalTok{,}
+    \StringTok{"S100a4"}\NormalTok{, }\StringTok{"S100a2"}\NormalTok{, }\StringTok{"S100a3"}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{    .[. }\SpecialCharTok{\%in\%} \FunctionTok{rownames}\NormalTok{(srt)],}
+  \AttributeTok{split.by =} \StringTok{"sex"}
+\NormalTok{) }\SpecialCharTok{+} \FunctionTok{RotatedAxis}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=25in,height=\textheight]{05-de_test-sex_files/figure-pdf/plt-dotplot-cacybp-1.png}
+
+}
+
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{Iterate\_FeaturePlot\_scCustom}\NormalTok{(}\AttributeTok{reduction =} \StringTok{"densmap\_xgboost"}\NormalTok{,}
+  \AttributeTok{na\_cutoff =} \ConstantTok{NA}\NormalTok{,}
+  \AttributeTok{pt.size =} \DecValTok{4}\NormalTok{,}
+  \AttributeTok{order =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{alpha\_na\_exp =} \FloatTok{0.1}\NormalTok{,}
+  \AttributeTok{alpha\_exp =} \FloatTok{0.75}\NormalTok{, }\AttributeTok{seurat\_object =}\NormalTok{ srt, }\AttributeTok{gene\_list =}\NormalTok{ top\_30, }\AttributeTok{single\_pdf =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{file\_path =}\NormalTok{ plots\_dir, }\AttributeTok{file\_type=}\StringTok{".pdf"}\NormalTok{, }\AttributeTok{file\_name =} \FunctionTok{sprintf}\NormalTok{(}\StringTok{"\%s.pdf"}\NormalTok{, bioproject), }\AttributeTok{colors\_use =}\NormalTok{ srt}\SpecialCharTok{@}\NormalTok{misc}\SpecialCharTok{$}\NormalTok{expr\_Colour\_Pal}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{DotPlot}\NormalTok{(}\AttributeTok{object =}\NormalTok{ srt, }\AttributeTok{features =}\NormalTok{ npr[npr }\SpecialCharTok{\%in\%} \FunctionTok{rownames}\NormalTok{(srt)], }\AttributeTok{split.by =} \StringTok{"sex"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{RotatedAxis}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=50in,height=\textheight]{05-de_test-sex_files/figure-pdf/plt-dotplot-dendrogram-genes-npr-1.png}
+
+}
+
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{DotPlot}\NormalTok{(}\AttributeTok{object =}\NormalTok{ srt, }\AttributeTok{features =}\NormalTok{ nmr[nmr }\SpecialCharTok{\%in\%} \FunctionTok{rownames}\NormalTok{(srt)], }\AttributeTok{split.by =} \StringTok{"sex"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{RotatedAxis}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=68.75in,height=\textheight]{05-de_test-sex_files/figure-pdf/plt-dotplot-dendrogram-genes-nmr-1.png}
+
+}
+
+\end{figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{DotPlot}\NormalTok{(}\AttributeTok{object =}\NormalTok{ srt, }\AttributeTok{features =}\NormalTok{ genes.embed[genes.embed }\SpecialCharTok{\%in\%} \FunctionTok{rownames}\NormalTok{(srt)], }\AttributeTok{split.by =} \StringTok{"sex"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{RotatedAxis}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics[width=65.625in,height=\textheight]{05-de_test-sex_files/figure-pdf/plt-dotplot-dendrogram-genes-adgen-1.png}
+
+}
+
+\end{figure}
+
+\hypertarget{session-information}{%
+\subsection{Session information}\label{session-information}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sI }\OtherTok{\textless{}{-}}\NormalTok{ sessioninfo}\SpecialCharTok{::}\FunctionTok{session\_info}\NormalTok{()}
+\NormalTok{sI}\SpecialCharTok{$}\NormalTok{loadedOnly }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
+\FunctionTok{print}\NormalTok{(sI, }\AttributeTok{locale =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+- Session info ---------------------------------------------------------------
+ setting  value
+ version  R version 4.2.2 (2022-10-31)
+ os       Ubuntu 22.04.2 LTS
+ system   x86_64, linux-gnu
+ ui       X11
+ language en_US:en
+ collate  en_US.UTF-8
+ ctype    en_US.UTF-8
+ tz       Etc/UTC
+ date     2023-06-28
+ pandoc   2.19.2 @ /opt/python/3.8.8/bin/ (via rmarkdown)
+
+- Packages -------------------------------------------------------------------
+ package              * version     date (UTC) lib source
+ abind                  1.4-5       2016-07-21 [1] RSPM (R 4.2.0)
+ anndata              * 0.7.5.6     2023-03-17 [1] RSPM (R 4.2.0)
+ assertthat             0.2.1       2019-03-21 [1] RSPM (R 4.2.0)
+ base64enc              0.1-3       2015-07-28 [1] RSPM (R 4.2.0)
+ bayestestR             0.13.1      2023-04-30 [1] https://easystats.r-universe.dev (R 4.2.2)
+ beeswarm               0.4.0       2021-06-01 [1] RSPM (R 4.2.0)
+ Biobase                2.58.0      2022-11-01 [1] RSPM (R 4.2.2)
+ BiocGenerics           0.44.0      2022-11-01 [1] RSPM (R 4.2.2)
+ BiocManager            1.30.20     2023-02-24 [1] RSPM (R 4.2.0)
+ bit                    4.0.5       2022-11-15 [1] RSPM (R 4.2.0)
+ bit64                  4.0.5       2020-08-30 [1] RSPM (R 4.2.0)
+ bitops                 1.0-7       2021-04-24 [1] RSPM (R 4.2.0)
+ circlize               0.4.15      2022-05-10 [1] RSPM (R 4.2.0)
+ cli                    3.6.1       2023-03-23 [1] RSPM (R 4.2.0)
+ cluster                2.1.4       2022-08-22 [1] RSPM (R 4.2.0)
+ coda                   0.19-4      2020-09-30 [1] RSPM (R 4.2.0)
+ codetools              0.2-19      2023-02-01 [1] RSPM (R 4.2.0)
+ colorspace             2.1-0       2023-01-23 [1] RSPM (R 4.2.0)
+ correlation            0.8.4       2023-04-30 [1] Github (easystats/correlation@3d5cd1e)
+ cowplot              * 1.1.1       2020-12-30 [1] RSPM (R 4.2.0)
+ crayon                 1.5.2       2022-09-29 [1] RSPM (R 4.2.0)
+ data.table             1.14.8      2023-02-17 [1] RSPM (R 4.2.0)
+ datawizard             0.7.1       2023-04-03 [1] RSPM (R 4.2.0)
+ DelayedArray           0.24.0      2022-11-01 [1] RSPM (R 4.2.2)
+ deldir                 1.0-6       2021-10-23 [1] RSPM (R 4.2.0)
+ digest                 0.6.31      2022-12-11 [1] RSPM (R 4.2.0)
+ dplyr                * 1.1.2       2023-04-20 [1] RSPM (R 4.2.2)
+ ellipsis               0.3.2       2021-04-29 [1] RSPM (R 4.2.0)
+ emmeans                1.8.5       2023-03-08 [1] RSPM (R 4.2.0)
+ estimability           1.4.1       2022-08-05 [1] RSPM (R 4.2.0)
+ evaluate               0.20        2023-01-17 [1] RSPM (R 4.2.0)
+ fansi                  1.0.4       2023-01-22 [1] RSPM (R 4.2.0)
+ farver                 2.1.1       2022-07-06 [1] RSPM (R 4.2.0)
+ fastmap                1.1.1       2023-02-24 [1] RSPM (R 4.2.0)
+ fitdistrplus           1.1-11      2023-04-25 [1] RSPM (R 4.2.2)
+ forcats              * 1.0.0       2023-01-29 [1] RSPM (R 4.2.0)
+ future               * 1.32.0      2023-03-07 [1] RSPM (R 4.2.0)
+ future.apply           1.10.0      2022-11-05 [1] RSPM (R 4.2.0)
+ generics               0.1.3       2022-07-05 [1] RSPM (R 4.2.0)
+ GenomeInfoDb           1.34.9      2023-02-02 [1] RSPM (R 4.2.2)
+ GenomeInfoDbData       1.2.9       2023-04-30 [1] RSPM (R 4.2.2)
+ GenomicRanges          1.50.2      2022-12-16 [1] RSPM (R 4.2.2)
+ ggbeeswarm             0.7.2       2023-04-30 [1] Github (eclarke/ggbeeswarm@3cf58a9)
+ ggmin                  0.0.0.9000  2023-04-30 [1] Github (sjessa/ggmin@8ada274)
+ ggplot2              * 3.4.2       2023-04-03 [1] RSPM (R 4.2.0)
+ ggprism                1.0.4       2023-04-30 [1] Github (csdaw/ggprism@0e411f4)
+ ggrastr                1.0.1       2023-04-30 [1] Github (VPetukhov/ggrastr@7aed9af)
+ ggrepel                0.9.2.9999  2023-04-30 [1] Github (slowkow/ggrepel@fe3b5c3)
+ ggridges               0.5.4       2022-09-26 [1] RSPM (R 4.2.0)
+ ggstatsplot          * 0.11.1.9000 2023-04-30 [1] Github (IndrajeetPatil/ggstatsplot@befe812)
+ GlobalOptions          0.1.2       2020-06-10 [1] RSPM (R 4.2.0)
+ globals                0.16.2      2022-11-21 [1] RSPM (R 4.2.0)
+ glue                   1.6.2       2022-02-24 [1] RSPM (R 4.2.0)
+ goftest                1.2-3       2021-10-07 [1] RSPM (R 4.2.0)
+ gridExtra              2.3         2017-09-09 [1] RSPM (R 4.2.0)
+ gtable                 0.3.3       2023-03-21 [1] RSPM (R 4.2.0)
+ hdf5r                  1.3.8       2023-01-21 [1] RSPM (R 4.2.2)
+ here                 * 1.0.1       2020-12-13 [1] RSPM (R 4.2.0)
+ hms                    1.1.3       2023-03-21 [1] RSPM (R 4.2.0)
+ htmltools              0.5.5       2023-03-23 [1] RSPM (R 4.2.0)
+ htmlwidgets            1.6.2       2023-03-17 [1] RSPM (R 4.2.0)
+ httpuv                 1.6.9       2023-02-14 [1] RSPM (R 4.2.0)
+ httr                   1.4.5       2023-02-24 [1] RSPM (R 4.2.0)
+ ica                    1.0-3       2022-07-08 [1] RSPM (R 4.2.0)
+ igraph                 1.4.1       2023-02-24 [1] RSPM (R 4.2.0)
+ insight                0.19.1      2023-03-18 [1] RSPM (R 4.2.0)
+ IRanges                2.32.0      2022-11-01 [1] RSPM (R 4.2.2)
+ irlba                  2.3.5.1     2022-10-03 [1] RSPM (R 4.2.0)
+ janitor                2.2.0.9000  2023-04-30 [1] Github (sfirke/janitor@d64c8bb)
+ jsonlite               1.8.4       2022-12-06 [1] RSPM (R 4.2.0)
+ KernSmooth             2.23-20     2021-05-03 [1] RSPM (R 4.2.0)
+ knitr                  1.42        2023-01-25 [1] RSPM (R 4.2.0)
+ labeling               0.4.2       2020-10-20 [1] RSPM (R 4.2.0)
+ later                  1.3.0       2021-08-18 [1] RSPM (R 4.2.0)
+ lattice                0.21-8      2023-04-05 [1] RSPM (R 4.2.0)
+ lazyeval               0.2.2       2019-03-15 [1] RSPM (R 4.2.0)
+ leiden                 0.4.3       2022-09-10 [1] RSPM (R 4.2.0)
+ lifecycle              1.0.3       2022-10-07 [1] RSPM (R 4.2.0)
+ listenv                0.9.0       2022-12-16 [1] RSPM (R 4.2.0)
+ lmtest                 0.9-40      2022-03-21 [1] RSPM (R 4.2.0)
+ lubridate            * 1.9.2       2023-02-10 [1] RSPM (R 4.2.0)
+ magrittr             * 2.0.3       2022-03-30 [1] RSPM (R 4.2.0)
+ MASS                   7.3-58.1    2022-08-03 [1] CRAN (R 4.2.2)
+ MAST                   1.24.1      2023-01-23 [1] RSPM (R 4.2.2)
+ Matrix                 1.5-4       2023-04-04 [1] RSPM (R 4.2.0)
+ MatrixGenerics         1.10.0      2022-11-01 [1] RSPM (R 4.2.2)
+ matrixStats            0.63.0      2022-11-18 [1] RSPM (R 4.2.0)
+ mime                   0.12        2021-09-28 [1] RSPM (R 4.2.0)
+ miniUI                 0.1.1.1     2018-05-18 [1] RSPM (R 4.2.0)
+ multcomp               1.4-23      2023-03-09 [1] RSPM (R 4.2.0)
+ munsell                0.5.0       2018-06-12 [1] RSPM (R 4.2.0)
+ mvtnorm                1.1-3       2021-10-08 [1] RSPM (R 4.2.0)
+ nlme                   3.1-162     2023-01-31 [1] RSPM (R 4.2.0)
+ paletteer              1.5.0       2022-10-19 [1] RSPM (R 4.2.0)
+ parallelly             1.35.0      2023-03-23 [1] RSPM (R 4.2.0)
+ parameters             0.20.3      2023-04-05 [1] RSPM (R 4.2.0)
+ patchwork            * 1.1.2.9000  2023-04-30 [1] Github (thomasp85/patchwork@c14c960)
+ pbapply                1.7-0       2023-01-13 [1] RSPM (R 4.2.0)
+ pillar                 1.9.0       2023-03-22 [1] RSPM (R 4.2.0)
+ pkgconfig              2.0.3       2019-09-22 [1] RSPM (R 4.2.0)
+ plotly                 4.10.1      2022-11-07 [1] RSPM (R 4.2.0)
+ plyr                   1.8.8       2022-11-11 [1] RSPM (R 4.2.0)
+ png                    0.1-8       2022-11-29 [1] RSPM (R 4.2.0)
+ polyclip               1.10-4      2022-10-20 [1] RSPM (R 4.2.0)
+ prettyunits            1.1.1       2020-01-24 [1] RSPM (R 4.2.0)
+ progress               1.2.2       2019-05-16 [1] RSPM (R 4.2.0)
+ progressr              0.13.0      2023-01-10 [1] RSPM (R 4.2.0)
+ promises               1.2.0.1     2021-02-11 [1] RSPM (R 4.2.0)
+ purrr                * 1.0.1       2023-01-10 [1] RSPM (R 4.2.0)
+ R.methodsS3            1.8.2       2022-06-13 [1] RSPM (R 4.2.0)
+ R.oo                   1.25.0      2022-06-12 [1] RSPM (R 4.2.0)
+ R.utils                2.12.2      2022-11-11 [1] RSPM (R 4.2.0)
+ R6                     2.5.1       2021-08-19 [1] RSPM (R 4.2.0)
+ ragg                   1.2.5       2023-01-12 [1] RSPM (R 4.2.0)
+ RANN                   2.6.1       2019-01-08 [1] RSPM (R 4.2.0)
+ RColorBrewer         * 1.1-3       2022-04-03 [1] RSPM (R 4.2.0)
+ Rcpp                   1.0.10      2023-01-22 [1] RSPM (R 4.2.0)
+ RcppAnnoy              0.0.20      2022-10-27 [1] RSPM (R 4.2.0)
+ RCurl                  1.98-1.12   2023-03-27 [1] RSPM (R 4.2.0)
+ readr                * 2.1.4       2023-02-10 [1] RSPM (R 4.2.0)
+ rematch2               2.1.2       2020-05-01 [1] RSPM (R 4.2.0)
+ remotes                2.4.2       2021-11-30 [1] RSPM (R 4.2.0)
+ repr                   1.1.6       2023-01-26 [1] RSPM (R 4.2.0)
+ reshape2               1.4.4       2020-04-09 [1] RSPM (R 4.2.0)
+ reticulate           * 1.28-9000   2023-04-30 [1] Github (rstudio/reticulate@442c49f)
+ rlang                  1.1.0       2023-03-14 [1] RSPM (R 4.2.0)
+ rmarkdown              2.21        2023-03-26 [1] RSPM (R 4.2.0)
+ ROCR                   1.0-11      2020-05-02 [1] RSPM (R 4.2.0)
+ rprojroot              2.0.3       2022-04-02 [1] RSPM (R 4.2.0)
+ rsvd                   1.0.5       2021-04-16 [1] RSPM (R 4.2.0)
+ Rtsne                  0.16        2022-04-17 [1] RSPM (R 4.2.0)
+ S4Vectors              0.36.2      2023-02-26 [1] RSPM (R 4.2.2)
+ sandwich               3.0-2       2022-06-15 [1] RSPM (R 4.2.0)
+ scales                 1.2.1       2022-08-20 [1] RSPM (R 4.2.0)
+ scattermore            0.8         2022-02-14 [1] RSPM (R 4.2.0)
+ scCustomize          * 1.1.1       2023-04-30 [1] Github (samuel-marsh/scCustomize@d08268d)
+ sceasy               * 0.0.7       2023-04-30 [1] Github (cellgeni/sceasy@0cfc0e3)
+ sctransform            0.3.5       2022-09-21 [1] RSPM (R 4.2.0)
+ sessioninfo            1.2.2       2021-12-06 [1] RSPM (R 4.2.0)
+ Seurat               * 4.3.0       2022-11-18 [1] RSPM (R 4.2.2)
+ SeuratDisk           * 0.0.0.9020  2023-04-30 [1] Github (mojaveazure/seurat-disk@9b89970)
+ SeuratObject         * 4.1.3       2022-11-07 [1] RSPM (R 4.2.0)
+ SeuratWrappers       * 0.3.1       2023-04-30 [1] Github (satijalab/seurat-wrappers@d28512f)
+ shape                  1.4.6       2021-05-19 [1] RSPM (R 4.2.0)
+ shiny                  1.7.4       2022-12-15 [1] RSPM (R 4.2.0)
+ SingleCellExperiment   1.20.1      2023-03-17 [1] RSPM (R 4.2.2)
+ skimr                * 2.1.5       2023-04-30 [1] Github (ropensci/skimr@d5126aa)
+ snakecase              0.11.0      2019-05-25 [1] RSPM (R 4.2.0)
+ sp                     1.6-0       2023-01-19 [1] RSPM (R 4.2.0)
+ spatstat.data          3.0-1       2023-03-12 [1] RSPM (R 4.2.0)
+ spatstat.explore       3.1-0       2023-03-14 [1] RSPM (R 4.2.0)
+ spatstat.geom          3.1-0       2023-03-12 [1] RSPM (R 4.2.0)
+ spatstat.random        3.1-4       2023-03-13 [1] RSPM (R 4.2.0)
+ spatstat.sparse        3.0-1       2023-03-12 [1] RSPM (R 4.2.0)
+ spatstat.utils         3.0-2       2023-03-11 [1] RSPM (R 4.2.0)
+ statsExpressions       1.5.0       2023-02-19 [1] RSPM (R 4.2.0)
+ stringi                1.7.12      2023-01-11 [1] RSPM (R 4.2.0)
+ stringr              * 1.5.0       2022-12-02 [1] RSPM (R 4.2.0)
+ SummarizedExperiment   1.28.0      2022-11-01 [1] RSPM (R 4.2.2)
+ survival               3.5-5       2023-03-12 [1] RSPM (R 4.2.0)
+ systemfonts            1.0.4       2022-02-11 [1] RSPM (R 4.2.0)
+ tensor                 1.5         2012-05-05 [1] RSPM (R 4.2.0)
+ textshaping            0.3.6       2021-10-13 [1] RSPM (R 4.2.0)
+ TH.data                1.1-1       2022-04-26 [1] RSPM (R 4.2.0)
+ tibble               * 3.2.1       2023-03-20 [1] RSPM (R 4.2.0)
+ tidyr                * 1.3.0       2023-01-24 [1] RSPM (R 4.2.0)
+ tidyselect             1.2.0       2022-10-10 [1] RSPM (R 4.2.0)
+ tidyverse            * 2.0.0.9000  2023-04-30 [1] Github (tidyverse/tidyverse@8ec2e1f)
+ timechange             0.2.0       2023-01-11 [1] RSPM (R 4.2.0)
+ tzdb                   0.3.0       2022-03-28 [1] RSPM (R 4.2.0)
+ utf8                   1.2.3       2023-01-31 [1] RSPM (R 4.2.0)
+ uwot                   0.1.14      2022-08-22 [1] RSPM (R 4.2.0)
+ vctrs                  0.6.2       2023-04-19 [1] RSPM (R 4.2.2)
+ vipor                  0.4.5       2017-03-22 [1] RSPM (R 4.2.0)
+ viridis              * 0.6.2       2021-10-13 [1] RSPM (R 4.2.0)
+ viridisLite          * 0.4.1       2022-08-22 [1] RSPM (R 4.2.0)
+ vroom                  1.6.1       2023-01-22 [1] RSPM (R 4.2.0)
+ withr                  2.5.0       2022-03-03 [1] RSPM (R 4.2.0)
+ xfun                   0.39        2023-04-20 [1] RSPM (R 4.2.2)
+ xtable                 1.8-4       2019-04-21 [1] RSPM (R 4.2.0)
+ XVector                0.38.0      2022-11-01 [1] RSPM (R 4.2.2)
+ yaml                   2.3.7       2023-01-23 [1] RSPM (R 4.2.0)
+ zeallot                0.1.0       2018-01-28 [1] RSPM (R 4.2.0)
+ zlibbioc               1.44.0      2022-11-01 [1] RSPM (R 4.2.2)
+ zoo                    1.8-12      2023-04-13 [1] RSPM (R 4.2.2)
+
+ [1] /opt/R/4.2.2/lib/R/library
+
+- Python configuration -------------------------------------------------------
+ python:         /opt/python/3.8.8/bin/python
+ libpython:      /opt/python/3.8.8/lib/libpython3.8.so
+ pythonhome:     /opt/python/3.8.8:/opt/python/3.8.8
+ version:        3.8.8 | packaged by conda-forge | (default, Feb 20 2021, 16:22:27)  [GCC 9.3.0]
+ numpy:          /opt/python/3.8.8/lib/python3.8/site-packages/numpy
+ numpy_version:  1.23.5
+ scanpy:         /opt/python/3.8.8/lib/python3.8/site-packages/scanpy
+ 
+ NOTE: Python version was forced by RETICULATE_PYTHON
+
+------------------------------------------------------------------------------
+\end{verbatim}
+
+
+
+\end{document}

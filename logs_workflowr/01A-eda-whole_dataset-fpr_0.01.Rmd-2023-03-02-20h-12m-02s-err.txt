@@ -1,0 +1,177 @@
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+System has not been booted with systemd as init system (PID 1). Can't operate.
+Failed to connect to bus: Host is down
+  |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%
+  |                                                                              |                                                                      |   0%  |                                                                              |==================                                                    |  25%  |                                                                              |===================================                                   |  50%  |                                                                              |====================================================                  |  75%  |                                                                              |======================================================================| 100%
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Calculating gene variances
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating feature variances of standardized and clipped values
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Loading .Rprofile for the current workflowr project
+Loading .Rprofile for the current workflowr project
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+Loading .Rprofile for the current workflowr project
+Loading .Rprofile for the current workflowr project
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Loading .Rprofile for the current workflowr project
+This is workflowr version 1.7.0
+Run ?workflowr for help getting started
+Error in kmeans(data, centers = i) : 
+  more cluster centers than distinct data points.
+In addition: Warning messages:
+1: ggrepel: 48 unlabeled data points (too many overlaps). Consider increasing max.overlaps 
+2: ggrepel: 46 unlabeled data points (too many overlaps). Consider increasing max.overlaps 
+3: In in_dir(input_dir(), expr) :
+  You changed the working directory to /data/PRJNA548917/analysis (probably via setwd()). It will be restored to /data/PRJNA548917. See the Note section in ?knitr::knit
+4: ggrepel: 4 unlabeled data points (too many overlaps). Consider increasing max.overlaps 
+5: ggrepel: 4 unlabeled data points (too many overlaps). Consider increasing max.overlaps 
+6: In in_dir(input_dir(), expr) :
+  You changed the working directory to /data/PRJNA548917/analysis (probably via setwd()). It will be restored to /data/PRJNA548917. See the Note section in ?knitr::knit
+7: In in_dir(input_dir(), expr) :
+  You changed the working directory to /data/PRJNA548917/analysis (probably via setwd()). It will be restored to /data/PRJNA548917. See the Note section in ?knitr::knit
+8: In in_dir(input_dir(), expr) :
+  You changed the working directory to /data/PRJNA548917/analysis (probably via setwd()). It will be restored to /data/PRJNA548917. See the Note section in ?knitr::knit

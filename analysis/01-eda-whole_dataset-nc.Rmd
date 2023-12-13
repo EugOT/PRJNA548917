@@ -1,0 +1,129 @@
+---
+title: "Exploratory analysis and Quality Control of Hypothalamus dataset from Romanov RA et al 2020"
+author: "Evgenii O. Tretiakov"
+date: "`r Sys.Date()`"
+output:
+  workflowr::wflow_html:
+    toc: true
+---
+
+```{r setup, echo=FALSE, include=FALSE}
+docname <- "01-eda-whole_dataset-nc"
+now <- Sys.time()
+# Time chunks during knitting
+knitr::knit_hooks$set(timeit = function(before) {
+  if (before) {
+    print(paste("Start:", Sys.time()))
+    now <<- Sys.time()
+  } else {
+    print(paste("Stop:", Sys.time()))
+    print(Sys.time() - now)
+  }
+})
+
+knitr::opts_chunk$set(
+  autodep        = TRUE,
+  cache          = FALSE,
+  cache.path     = paste0("cache/", docname, "/"),
+  cache.comments = FALSE,
+  cache.lazy     = FALSE,
+  dev            = c("png", "pdf"),
+  echo           = TRUE,
+  error          = FALSE,
+  fig.align      = "center",
+  fig.width      = 14,
+  fig.height     = 12,
+  message        = FALSE,
+  warning        = FALSE,
+  timeit         = TRUE
+)
+Sys.setenv(RETICULATE_PYTHON = "/opt/python/3.8.8/bin/python")
+# Load tidyverse infrastructure packages
+suppressPackageStartupMessages({
+  library(here)
+  library(knitr)
+  library(RColorBrewer)
+  library(viridis)
+  library(tidyverse)
+  library(magrittr)
+  library(stringr)
+  library(skimr)
+  library(future)
+  library(zeallot)
+  library(kableExtra)
+  library(reticulate)
+})
+reticulate::use_condaenv("/opt/python/3.8.8/bin/python")
+
+suppressPackageStartupMessages({
+  library(Seurat)
+  library(SeuratWrappers)
+  library(SeuratDisk)
+  library(sctransform)
+  library(glmGamPoi)
+  library(clustree)
+  library(patchwork)
+  library(qs)
+  library(Scillus)
+  library(scCustomize)
+  library(Nebulosa)
+  library(mrtree)
+  library(gprofiler2)
+})
+
+# Set paths
+src_dir <- here("code")
+data_dir <- here("data")
+output_dir <- here("output")
+plots_dir <- here(output_dir, "figures")
+tables_dir <- here(output_dir, "tables")
+source(here(src_dir, "genes.R"))
+source(here(src_dir, "functions.R"))
+
+# parallelisation
+n_cores <- 12
+
+# set seed
+reseed <- 42
+set.seed(seed = reseed)
+
+# ggplot2 theme
+theme_set(ggmin::theme_powerpoint())
+```
+
+# Introduction
+
+In this document we are going to read in the **RAW** filtered counts matrix produced by `Cell Ranger`, the **RNA** filtered counts matrix, where we removed *Ambient RNA* using by `CellBender` at the false positive rate `FPR=0.001` threshold and results of *Cell Doublets* call that was done using `Scrublet` then using summary statistics we determine which of those genes affected the most by our filtering procedure visualising results by `scCustomize` package and derive several categories of low quality cells using set of manually adjusted threshold parameters. Next, we use filtered high quality dataset to perform initial annotation using `Seurat`, `leidenalg` and `clustree` packages and deduce stable multi-resolution reconcile clustering tree with `mrtree` that we need to identify major cell groups for further analysis.
+
+## Set QC parameters
+
+For the quality control we going to use set of well-known technical parameters reflecting sources of bias in data such as total mRNA content, percentage of mitochondrial mRNA content, fraction of molecules aligned to ribosomal genes, hemoglobine genes transcripts and overall cell complexity, which is determined as ratio between number of observed genes per molecule in logarithmic scale. As for doublets, we will use default `Scrublet` results.
+
+```{r params}
+bioproject <- "PRJNA548917"
+project <- "romanov2020_Hypoth-dev"
+low_cutoff_gene <- 500
+high_cutoff_gene <- NULL
+high_cutoff_gene <- 6000
+low_cutoff_umis <- NULL
+low_cutoff_umis <- -Inf
+high_cutoff_umis <- 20000
+high_cutoff_pc_mt <- 15
+high_cutoff_pc_ribo <- 15
+high_cutoff_pc_hb <- 0.1
+high_cutoff_doublet_score <- 0.33
+high_cutoff_complexity <- 0.85
+```
+
+```{r parent-chunk-name, include=FALSE, results = "hide"}
+child1 <- here::here("analysis/child/eda-nc.Rmd")
+childy <- readr::read_file(child1)
+```
+
+`r paste(knitr::knit_child(text = childy, options = list(cache = FALSE)), collapse = '\n')`
+
+## Session information
+
+```{r session-info, cache = FALSE}
+devtools::session_info()
+```

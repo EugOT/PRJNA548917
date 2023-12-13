@@ -1,0 +1,226 @@
+---
+title: "Correlation analysis of Hypothalamus astrocytes dataset from Romanov RA et al 2020"
+author: "Evgenii O. Tretiakov"
+date: "`r Sys.Date()`"
+format:
+  html:
+    toc: true
+    df-print: paged
+    code-fold: true
+    fig-width: 14
+    fig-height: 12
+    fig-format: retina
+    fig-responsive: true
+    fig-dpi: 600
+execute:
+  keep-md: false
+  echo: true
+  error: false
+  message: false
+  warning: false
+  debug: false
+knitr:
+  opts_chunk:
+    autodep: true
+    fig.align: center
+    fig.retina: 2
+    fig.width: 14
+    fig.height: 12
+---
+
+```{r setup, include = FALSE}
+DOCNAME <- "correlations-within-astrocytes-dataset-from-romanov2020"
+NOW <- Sys.time()
+
+# Time chunks during knitting
+knitr::knit_hooks$set(timeit = function(before) {
+  if (before) {
+    print(paste("Start:", Sys.time()))
+    NOW <<- Sys.time()
+  } else {
+    print(paste("Stop:", Sys.time()))
+    print(Sys.time() - NOW)
+  }
+})
+
+knitr::knit_hooks$set(debug = function(before, options, envir) {
+  if (!before) {
+    message(
+      paste(names(envir), as.list(envir),
+        sep = " = ", collapse = "\n"
+      )
+    )
+  }
+})
+
+knitr::opts_chunk$set(
+  cache          = FALSE,
+  dev            = c("png", "pdf"),
+  timeit         = TRUE
+)
+```
+
+## Load data and setup parameters
+
+```{r libraries, cache=FALSE}
+# Load tidyverse infrastructure packages
+suppressPackageStartupMessages({
+  library(future)
+  library(here)
+  library(tidyverse)
+  library(magrittr)
+  library(stringr)
+  library(skimr)
+  library(RColorBrewer)
+})
+
+
+# Load packages for scRNA-seq analysis and visualisation
+suppressPackageStartupMessages({
+  library(ggplot2)
+  library(cowplot)
+  library(patchwork)
+  library(ggstatsplot)
+  library(anndata)
+  library(sceasy)
+})
+
+sc <- import("scanpy", convert = FALSE)
+```
+
+### Set paths
+
+```{r paths}
+src_dir <- here("code")
+data_dir <- here("data")
+output_dir <- here("output")
+plots_dir <- here(output_dir, "figures")
+tables_dir <- here(output_dir, "tables")
+```
+
+### Load helper functions and gene-sets
+
+```{r source, cache = FALSE}
+source(here(src_dir, "genes.R"))
+source(here(src_dir, "functions.R"))
+```
+
+### Set fixed variables
+
+```{r params-computation, cache = FALSE}
+# set seed
+reseed <- 42
+set.seed(seed = reseed)
+
+# Parameters for parallel execution
+n_cores <- 32
+plan("multisession", workers = n_cores)
+options(
+  future.globals.maxSize = 100000 * 1024^2,
+  future.rng.onMisuse = "ignore"
+)
+plan()
+
+
+# ggplot2 theme
+theme_set(ggmin::theme_powerpoint())
+```
+
+```{r params}
+bioproject <- "PRJNA548917"
+project <- "romanov2020_Hypoth-dev"
+cb_fpr <- 0.001
+low_cutoff_gene <- 500
+high_cutoff_gene <- NULL
+high_cutoff_gene <- 6000
+low_cutoff_umis <- NULL
+low_cutoff_umis <- -Inf
+high_cutoff_umis <- 20000
+high_cutoff_pc_mt <- 15
+high_cutoff_pc_ribo <- 15
+high_cutoff_pc_hb <- 0.1
+high_cutoff_doublet_score <- 0.33
+high_cutoff_complexity <- 0.85
+```
+
+## Load selected astrocytes data from Romanov RA et al 2020
+
+```{r load-data, cache = FALSE}
+anndata <- sc$read(here(
+  data_dir,
+  sprintf("class_cello/%s-astrocytes_dataset-%s-initial_selection.h5ad", bioproject, cb_fpr)
+))
+```
+
+### Convert adata object to R AnnDataR6 object.
+```{r convert-to-seurat}
+adata <- py_to_r(anndata)
+# X_norm <- sc$pp$normalize_total(adata, target_sum = 1e+04, inplace = FALSE)["X"]
+sc$pp$normalize_total(adata, target_sum = 1e+04, inplace = TRUE)
+sc$pp$log1p(adata)
+class(adata)
+class(adata$X)
+adata
+```
+
+```{r export-expression}
+exp_mtx_fname <- here(
+  data_dir,
+  sprintf("%s-astrocytes_dataset-%s-expr-mtx.csv", bioproject, cb_fpr)
+)
+X <- as.data.frame(as.matrix(adata$X))
+readr::write_csv(X, file = exp_mtx_fname)
+```
+
+```{r select-features}
+# X <- as.data.frame(py_to_r(X_norm))
+# colnames(X) <- colnames(adata$X)
+X <- X[, c(npr, nmr, genes.embed) %>% .[. %in% colnames(X)]]
+X <- X[, colSums(X) > 0]
+```
+
+```{r metadata}
+cdata <- as.data.frame(adata$obs)
+```
+
+```{r merge-data}
+df <- cbind(cdata, X)
+glimpse(df)
+```
+
+```{r plot-corrmatrix, fig.height=120, fig.asp=1.236, fig.align="center", fig.cap="Correlation matrix of the metadata QC-metrics and the gene set of interest: neuromediators/neuropeptides receptors, metabolic enzymes and other markers of astocytic functional states"}
+plt_grp_ggcorrmat <- grouped_ggcorrmat(
+  ## arguments relevant for `ggcorrmat()`
+  data = df, type = "r",
+  cor.vars = c(nCount_RNA:log10GenesPerUMI, Adcyap1r1:Tkt),
+  grouping.var = libname,
+  ## arguments relevant for `combine_plots()`
+  plotgrid.args = list(nrow = 2),
+  annotation.args = list(
+    tag_levels = "a",
+    title = "Relationship between astrocytic functional states markers, neuromediators \nand neuropeptides receptors, metabolic enzymes and the metadata QC-metrics",
+    caption = "Dataset: subset of astrocytes from the Hypothalamus of the mouse hypothalamus (Romanov RA et al 2020)"
+  )
+)
+
+plt_grp_ggcorrmat
+```
+
+```{r save-plt-corrmatrix}
+save_my_plot(
+  name = bioproject,
+  plt = plt_grp_ggcorrmat,
+  type = "stat-corrmatrix-plt",
+  h = 120,
+  asp = .809
+)
+```
+
+
+## Session information
+
+```{r session-info, cache = FALSE}
+sI <- sessioninfo::session_info()
+sI$loadedOnly <- NULL
+print(sI, locale = FALSE)
+```

@@ -1,0 +1,523 @@
+---
+title: "Differential expression analysis of Hypothalamus astrocytes dataset from Romanov RA et al 2020"
+author: "Evgenii O. Tretiakov"
+date: "`r Sys.Date()`"
+format:
+  html:
+    toc: true
+    df-print: paged
+    code-fold: true
+    fig-width: 9
+    fig-height: 12
+    fig-format: retina
+    fig-responsive: true
+    fig-dpi: 600
+execute:
+  keep-md: false
+  echo: true
+  error: false
+  message: false
+  warning: false
+  debug: false
+knitr:
+  opts_chunk:
+    autodep: true
+    fig.align: center
+    fig.retina: 2
+    fig.width: 14
+    fig.height: 12
+---
+
+```{r setup, include = FALSE}
+DOCNAME <- "de-astrocytes-between-regions-on-dataset-from-romanov2020"
+NOW <- Sys.time()
+
+# Time chunks during knitting
+knitr::knit_hooks$set(timeit = function(before) {
+  if (before) {
+    print(paste("Start:", Sys.time()))
+    NOW <<- Sys.time()
+  } else {
+    print(paste("Stop:", Sys.time()))
+    print(Sys.time() - NOW)
+  }
+})
+
+knitr::knit_hooks$set(debug = function(before, options, envir) {
+  if (!before) {
+    message(
+      paste(names(envir), as.list(envir),
+        sep = " = ", collapse = "\n"
+      )
+    )
+  }
+})
+
+knitr::opts_chunk$set(
+  cache          = FALSE,
+  dev            = c("png", "pdf"),
+  timeit         = TRUE
+)
+```
+
+## Load data and setup parameters
+
+```{r libraries, cache=FALSE}
+# Load tidyverse infrastructure packages
+suppressPackageStartupMessages({
+  library(future)
+  library(here)
+  library(tidyverse)
+  library(magrittr)
+  library(stringr)
+  library(skimr)
+  library(RColorBrewer)
+  library(viridis)
+})
+
+
+# Load packages for scRNA-seq analysis and visualisation
+suppressPackageStartupMessages({
+  library(ggplot2)
+  library(cowplot)
+  library(patchwork)
+  library(ggstatsplot)
+  library(sceasy)
+  library(Seurat)
+  library(SeuratDisk)
+  library(SeuratWrappers)
+  library(schex)
+  library(scCustomize)
+})
+```
+
+### Set paths
+
+```{r paths}
+src_dir <- here("code")
+data_dir <- here("../data")
+output_dir <- here("output")
+plots_dir <- here(output_dir, "figures/")
+tables_dir <- here(output_dir, "tables/")
+```
+
+### Load helper functions and gene-sets
+
+```{r source, cache = FALSE}
+source(here(src_dir, "genes.R"))
+source(here(src_dir, "functions.R"))
+```
+
+### Set fixed variables
+
+```{r params-computation, cache = FALSE}
+# set seed
+reseed <- 42
+set.seed(seed = reseed)
+
+# Parameters for parallel execution
+n_cores <- 32
+plan("multisession", workers = n_cores)
+options(
+  future.globals.maxSize = 100000 * 1024^2,
+  future.rng.onMisuse = "ignore"
+)
+plan()
+
+
+# ggplot2 theme
+theme_set(ggmin::theme_powerpoint())
+```
+
+```{r params}
+bioproject <- "PRJNA548917"
+project <- "romanov2020_Hypoth-dev"
+cb_fpr <- 0.001
+low_cutoff_gene <- 500
+high_cutoff_gene <- NULL
+high_cutoff_gene <- 6000
+low_cutoff_umis <- NULL
+low_cutoff_umis <- -Inf
+high_cutoff_umis <- 20000
+high_cutoff_pc_mt <- 15
+high_cutoff_pc_ribo <- 15
+high_cutoff_pc_hb <- 0.1
+high_cutoff_doublet_score <- 0.33
+high_cutoff_complexity <- 0.85
+connectivity_model <- "min_tree"
+k <- 10
+metric <- "euclidean"
+signature <- 100
+```
+
+## Load predicted astrocytes data and subset from Romanov RA et al 2020
+
+
+```{r load-seurat}
+srt_path <- here(
+  data_dir,
+  sprintf("resolved_subregions_by_microclusters/best_xgboost-subregional_%s-astrocytes_dataset-msp_%s-metric_%s-k_%s-sign_%s-amb_%s.h5Seurat", bioproject, connectivity_model, metric, k, signature, cb_fpr)
+)
+srt <- LoadH5Seurat(file = srt_path)
+
+srt <- Store_Palette_Seurat(seurat_object = srt, palette = c("#ffff00", "#fae200", "#f4c500", "#eeab00", "#e99500", "#e37f00", "#dd6b00", "#d75b00", "#d04c00", "#c93e00", "#c33300", "#bc2800", "#b42003", "#ad1941", "#a41281", "#9c0db7", "#9309dd", "#8906f7", "#7f04ff", "#7402f6", "#6701db", "#5900b0", "#49007e", "#32003e", "#000000"), palette_name = "expr_Colour_Palette_gnuplot_rette_gnuplot_r")
+
+colours_code <- c(
+  "0" = "grey30",
+  "1" = "blue",
+  "2" = "skyblue",
+  "3" = "forestgreen",
+  "4" = "greenyellow",
+  "5" = "yellow",
+  "6" = "orangered",
+  "7" = "grey70"
+)
+
+colours_region <- c(
+  "ARC" = "grey30",
+  "LHA" = "blue",
+  "MnPO" = "skyblue",
+  "POA" = "forestgreen",
+  "PVN" = "greenyellow",
+  "SCN" = "yellow",
+  "VMH" = "orangered",
+  "VPH" = "grey70"
+)
+
+print(srt)
+invisible(gc())
+```
+
+
+```{r scale-data}
+srt <- NormalizeData(srt)
+srt <- FindVariableFeatures(srt, selection.method = "vst", nfeatures = 5000)
+all.genes <- rownames(srt)
+srt <- ScaleData(srt, features = all.genes)
+```
+
+
+```{r save-markers-featureplots-at_genes}
+selected_genes <- c(
+  "Insr", "Meis1", "Igf1r", "Nrf1", "Prlr", "Camk1d", "Lars2", "Cacna2d3", # 0 ARC
+  "Dcn", "Ptgds", "Nupr1", "Igfbp2", "Nrarp", "Ctnna2", "Ldlr", "Mmp14", # 1 LHA
+  "Nkx6-2", "Cirbp", "Selenop", # 2 MnPO
+  "Foxg1", "Crym", "Sema3c", "Meis2", "Dbp", "Drd1", "Drd2", "Drd3", "Drd4", "Drd5", # 3 POA
+  "Egr1", "Ttr", "Btg2", "Mbnl3", "Pgf", "Irs4", "Gpr101", "Nr3c2", "Agtr1", # 4 PVN
+  "Rfx4", "Dbx2", "Prokr2", "Cebpb", "Zic1", "Zic2", "Ccn1", "Gata4", "Klf10", # 5 SCN
+  "Tbx3", "Fis1", "Ndn", "Psmc5", "Drap1", "Pcsk1n", "Rtn1", # 6 VMH
+  "Emx2", "Sgip1", "Myoc", "Hivep3", "Dcc", "Ltbp1", "Egfem1", # 7 VPH
+  "Klf4", "Atf3", "Nrg1", "Cdk8", "Qrfpr", "Hcrtr1", "Hcrtr2", "Tacr1", "Trhr", "Tshr",
+  "Gfap", "Fgf1", "Fgfr3", "Hepacam", "Hif1", "Htra1", "Lxn", "Ndrg2", "Ntn1", "Nfia", "Slit2", "Aqp4", "S100a1", "S100a6", "S100b", "Slc1a2", "Slc1a3", "Slc38a1", "Vegfa", "Fos", "Fosb", "Jun", "Junb", "Jund", "Ier2", "Socs3", "Pde10a", "Fbln5", "Otp",
+  "2610507B11Rik",
+  "5430405H02Rik",
+  "9630014M24Rik",
+  "Abi2",
+  "Adam22",
+  "AI480526",
+  "Ank3",
+  "Ap3m1",
+  "Aplp1",
+  "App",
+  "Araf",
+  "Arhgap12",
+  "Arhgef10l",
+  "Arhgef28",
+  "Arpp21",
+  "Arrb1",
+  "Arsb",
+  "Asic2",
+  "Atg10",
+  "Atp11b",
+  "Atp1b1",
+  "Atp1b3",
+  "Atp6v1b2",
+  "Azin1",
+  "B3galt2",
+  "Basp1",
+  "Bicd1",
+  "Bmt2",
+  "Btg2",
+  "Cacna1a",
+  "Camta1",
+  "Car10",
+  "Ccser1",
+  "Cd38",
+  "Cdc26",
+  "Cdc42",
+  "Chd6",
+  "Clstn1",
+  "Coro2b",
+  "Cry2",
+  "Csmd2",
+  "Csnk1g3",
+  "Cyb5b",
+  "Dcc",
+  "Ddrgk1",
+  "Ddx6",
+  "Dennd5a",
+  "Dlat",
+  "Dlg2",
+  "Dlg5",
+  "Dnm2",
+  "Dock9",
+  "Dpp10",
+  "Dscam",
+  "Dync1i1",
+  "Dzank1",
+  "Dzip1",
+  "Eef2",
+  "Efr3b",
+  "Egfem1",
+  "Epas1",
+  "Epha5",
+  "Esco1",
+  "Fam107a",
+  "Fam155a",
+  "Fam171a1",
+  "Fam193a",
+  "Fam219a",
+  "Fbxw2",
+  "Fer",
+  "Fnbp1l",
+  "Fos",
+  "Gaa",
+  "Gabrb2",
+  "Gabrb3",
+  "Gfap",
+  "Gm1604a",
+  "Gnas",
+  "Gnl3l",
+  "Gpr158",
+  "Gprasp1",
+  "Gria4",
+  "Grik4",
+  "Hk1",
+  "Hmbox1",
+  "Hsd17b12",
+  "Id4",
+  "Ipo9",
+  "Jun",
+  "Kcnip4",
+  "Kif5a",
+  "Klc1",
+  "Klhl7",
+  "Lcor",
+  "Lhfpl3",
+  "Lix1",
+  "Lrrc8a",
+  "Luzp1",
+  "Ly6h",
+  "Map2k1",
+  "Map4k5",
+  "Map7d2",
+  "Mapk8",
+  "Marcksl1",
+  "Marf1",
+  "Megf9",
+  "Mia2",
+  "Mindy2",
+  "Mmp16",
+  "mt-Cytb",
+  "mt-Nd1",
+  "mt-Nd2",
+  "mt-Nd4",
+  "Mthfd2l",
+  "Mtss2",
+  "Ncan",
+  "Ncl",
+  "Ndufc2",
+  "Nfasc",
+  "Nfix",
+  "Nfs1",
+  "Nhs",
+  "Nkx6-2",
+  "Nmnat2",
+  "Nsf",
+  "Nsg2",
+  "Nxph1",
+  "Ocrl",
+  "Pam",
+  "Paqr6",
+  "Parp6",
+  "Pcbp2",
+  "Pcsk1n",
+  "Pdgfd",
+  "Pdss1",
+  "Pdxdc1",
+  "Pdzph1",
+  "Pea15a",
+  "Peg3",
+  "Pet100",
+  "Pi4ka",
+  "Pkia",
+  "Podxl2",
+  "Prr14",
+  "Psd2",
+  "Rab11fip4",
+  "Rab2a",
+  "Rab6b",
+  "Rac1",
+  "Rad23b",
+  "Ralyl",
+  "Rbfox1",
+  "Rbms3",
+  "Rftn2",
+  "Rgs7bp",
+  "Rpl22",
+  "Rpl30",
+  "Rpl37a",
+  "Rps14",
+  "Rps6",
+  "Rpsa",
+  "Rtn1",
+  "Samd12",
+  "Scarb2",
+  "Scd1",
+  "Selenot",
+  "Sfi1",
+  "Shisa6",
+  "Ski",
+  "Slc12a6",
+  "Slc25a3",
+  "Smarcc1",
+  "Snhg14",
+  "Snrk",
+  "Snrpn",
+  "Sntg1",
+  "Snx21",
+  "Spcs2",
+  "Spop",
+  "Spred2",
+  "Stk3",
+  "Stxbp5l",
+  "Taf1",
+  "Tafa1",
+  "Tbc1d5",
+  "Tbc1d9b",
+  "Tef",
+  "Tenm2",
+  "Tenm4",
+  "Thra",
+  "Thrsp",
+  "Timp2",
+  "Tmem106b",
+  "Tmem245",
+  "Tmsb4x",
+  "Tmx4",
+  "Tnr",
+  "Tom1",
+  "Tsix",
+  "Tspan13",
+  "Ttc3",
+  "Ube2l3",
+  "Ube2r2",
+  "Vps13d",
+  "Vps35l",
+  "Vwa8",
+  "Wasf3",
+  "Wdr26",
+  "Ywhae",
+  "Zfp644",
+  "Zwint"
+)
+
+
+Iterate_FeaturePlot_scCustom(
+  seurat_object = srt,
+  gene_list = selected_genes,
+  reduction = "densmap_xgboost",
+  na_cutoff = NA,
+  pt.size = 4,
+  order = TRUE,
+  raster = TRUE,
+  raster.dpi = c(960, 960),
+  alpha_na_exp = 0.1,
+  alpha_exp = 0.75,
+  single_pdf = FALSE,
+  file_path = plots_dir,
+  file_type = ".pdf",
+  file_name = sprintf("%s_selected", bioproject),
+  colors_use = srt@misc$expr_Colour_Palette_gnuplot_r
+)
+```
+
+```{r plot-densmap-xgboost}
+DimPlot_scCustom(
+  seurat_object = srt,
+  reduction = "densmap_xgboost",
+  group.by = "predict_xgboost_subregion",
+  figure_plot = TRUE,
+  raster = TRUE,
+  raster.dpi = c(960, 960),
+  seed = reseed,
+  pt.size = 4,
+  na.value = "white",
+  repel = TRUE,
+  colors_use = alpha(colours_code, 0.2)
+)
+```
+
+```{r plot-hexbin}
+srt <- make_hexbin(
+  srt,
+  nbins = 49,
+  dimension_reduction = "densmap_xgboost",
+  use_dims = c(1, 2)
+)
+
+plot_hexbin_density(srt) + ggsci::scale_fill_material("amber")
+
+plot_hexbin_meta(
+  srt,
+  col = "predict_xgboost_subregion",
+  action = "majority",
+  colors = colours_code
+)
+```
+
+```{r plot-hexbin-genes}
+plot_custom_median_hex <- function(gene_id) {
+  plot_hexbin_feature_plus(srt,
+    col = "predict_xgboost_subregion",
+    colors = colours_code,
+    feature = gene_id,
+    mod = "RNA",
+    type = "data",
+    action = "median",
+    xlab = "XGBoost_densMAP_1", ylab = "XGBoost_densMAP_2",
+    title = sprintf("Median of mRNA expression of %s in logarithmic scale", gene_id),
+  ) + scale_fill_gradientn(
+    colors = srt@misc$expr_Colour_Palette_gnuplot_r,
+    na.value = "white"
+  )
+}
+
+plot_custom_mean_hex <- function(gene_id) {
+  plot_hexbin_feature_plus(srt,
+    col = "predict_xgboost_subregion",
+    colors = colours_code,
+    feature = gene_id,
+    mod = "RNA",
+    type = "data",
+    action = "mean",
+    xlab = "XGBoost_densMAP_1", ylab = "XGBoost_densMAP_2",
+    title = sprintf("Mean of mRNA expression of %s in logarithmic scale", gene_id),
+  ) + scale_fill_gradientn(
+    colors = srt@misc$expr_Colour_Palette_gnuplot_r,
+    na.value = "white"
+  )
+}
+
+map(selected_genes[selected_genes %in% rownames(GetAssayData(object = srt, slot = "data"))], plot_custom_median_hex)
+map(selected_genes[selected_genes %in% rownames(GetAssayData(object = srt, slot = "data"))], plot_custom_mean_hex)
+```
+
+
+## Session information
+
+```{r session-info, cache = FALSE}
+sI <- sessioninfo::session_info()
+sI$loadedOnly <- NULL
+print(sI, locale = FALSE)
+```
