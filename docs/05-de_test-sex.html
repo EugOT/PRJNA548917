@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.262">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Evgenii O. Tretiakov">
+<meta name="dcterms.date" content="2023-06-28">
+
+<title>Differential expression analysis between sex of Hypothalamus astrocytes dataset from Romanov RA et al 2020</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="05-de_test-sex_files/libs/clipboard/clipboard.min.js"></script>
+<script src="05-de_test-sex_files/libs/quarto-html/quarto.js"></script>
+<script src="05-de_test-sex_files/libs/quarto-html/popper.min.js"></script>
+<script src="05-de_test-sex_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="05-de_test-sex_files/libs/quarto-html/anchor.min.js"></script>
+<link href="05-de_test-sex_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="05-de_test-sex_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="05-de_test-sex_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="05-de_test-sex_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="05-de_test-sex_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+<link href="05-de_test-sex_files/libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="05-de_test-sex_files/libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#load-data-and-setup-parameters" id="toc-load-data-and-setup-parameters" class="nav-link active" data-scroll-target="#load-data-and-setup-parameters">Load data and setup parameters</a>
+  <ul class="collapse">
+  <li><a href="#set-paths" id="toc-set-paths" class="nav-link" data-scroll-target="#set-paths">Set paths</a></li>
+  <li><a href="#load-helper-functions-and-gene-sets" id="toc-load-helper-functions-and-gene-sets" class="nav-link" data-scroll-target="#load-helper-functions-and-gene-sets">Load helper functions and gene-sets</a></li>
+  <li><a href="#set-fixed-variables" id="toc-set-fixed-variables" class="nav-link" data-scroll-target="#set-fixed-variables">Set fixed variables</a></li>
+  </ul></li>
+  <li><a href="#load-predicted-astrocytes-data-and-subset-from-romanov-ra-et-al-2020" id="toc-load-predicted-astrocytes-data-and-subset-from-romanov-ra-et-al-2020" class="nav-link" data-scroll-target="#load-predicted-astrocytes-data-and-subset-from-romanov-ra-et-al-2020">Load predicted astrocytes data and subset from Romanov RA et al 2020</a></li>
+  <li><a href="#session-information" id="toc-session-information" class="nav-link" data-scroll-target="#session-information">Session information</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Differential expression analysis between sex of Hypothalamus astrocytes dataset from Romanov RA et al 2020</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Evgenii O. Tretiakov </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 28, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="load-data-and-setup-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="load-data-and-setup-parameters">Load data and setup parameters</h2>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load tidyverse infrastructure packages</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(future)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(here)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(magrittr)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(stringr)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(skimr)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(RColorBrewer)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(viridis)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Load packages for scRNA-seq analysis and visualisation</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(cowplot)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(patchwork)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(ggstatsplot)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(anndata)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(sceasy)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(Seurat)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(SeuratDisk)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(SeuratWrappers)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(scCustomize)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>sc <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">"scanpy"</span>, <span class="at">convert =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="set-paths" class="level3">
+<h3 class="anchored" data-anchor-id="set-paths">Set paths</h3>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>src_dir <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"code"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>data_dir <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"../data"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>output_dir <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"output"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>plots_dir <span class="ot">&lt;-</span> <span class="fu">here</span>(output_dir, <span class="st">"figures"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>tables_dir <span class="ot">&lt;-</span> <span class="fu">here</span>(output_dir, <span class="st">"tables"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="load-helper-functions-and-gene-sets" class="level3">
+<h3 class="anchored" data-anchor-id="load-helper-functions-and-gene-sets">Load helper functions and gene-sets</h3>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">here</span>(src_dir, <span class="st">"genes.R"</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">here</span>(src_dir, <span class="st">"functions.R"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="set-fixed-variables" class="level3">
+<h3 class="anchored" data-anchor-id="set-fixed-variables">Set fixed variables</h3>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># set seed</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>reseed <span class="ot">&lt;-</span> <span class="dv">42</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="at">seed =</span> reseed)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters for parallel execution</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>n_cores <span class="ot">&lt;-</span> <span class="dv">32</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plan</span>(<span class="st">"multisession"</span>, <span class="at">workers =</span> n_cores)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">future.globals.maxSize =</span> <span class="dv">100000</span> <span class="sc">*</span> <span class="dv">1024</span><span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">future.rng.onMisuse =</span> <span class="st">"ignore"</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plan</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>multisession:
+- args: function (..., workers = 32, envir = parent.frame())
+- tweaked: TRUE
+- call: plan("multisession", workers = n_cores)</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot2 theme</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(ggmin<span class="sc">::</span><span class="fu">theme_powerpoint</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>bioproject <span class="ot">&lt;-</span> <span class="st">"PRJNA548917"</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>project <span class="ot">&lt;-</span> <span class="st">"romanov2020_Hypoth-dev"</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>cb_fpr <span class="ot">&lt;-</span> <span class="fl">0.001</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>low_cutoff_gene <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>high_cutoff_gene <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>high_cutoff_gene <span class="ot">&lt;-</span> <span class="dv">6000</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>low_cutoff_umis <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>low_cutoff_umis <span class="ot">&lt;-</span> <span class="sc">-</span><span class="cn">Inf</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>high_cutoff_umis <span class="ot">&lt;-</span> <span class="dv">20000</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>high_cutoff_pc_mt <span class="ot">&lt;-</span> <span class="dv">15</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>high_cutoff_pc_ribo <span class="ot">&lt;-</span> <span class="dv">15</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>high_cutoff_pc_hb <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>high_cutoff_doublet_score <span class="ot">&lt;-</span> <span class="fl">0.33</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>high_cutoff_complexity <span class="ot">&lt;-</span> <span class="fl">0.85</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>connectivity_model <span class="ot">&lt;-</span> <span class="st">"min_tree"</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>metric <span class="ot">&lt;-</span> <span class="st">"euclidean"</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>signature <span class="ot">&lt;-</span> <span class="dv">100</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="load-predicted-astrocytes-data-and-subset-from-romanov-ra-et-al-2020" class="level2">
+<h2 class="anchored" data-anchor-id="load-predicted-astrocytes-data-and-subset-from-romanov-ra-et-al-2020">Load predicted astrocytes data and subset from Romanov RA et al 2020</h2>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>srt_path <span class="ot">&lt;-</span> <span class="fu">here</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  data_dir,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">"resolved_subregions_by_microclusters/best_xgboost-subregional_%s-astrocytes_dataset-msp_%s-metric_%s-k_%s-sign_%s-amb_%s.h5Seurat"</span>, bioproject, connectivity_model, metric, k, signature, cb_fpr)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>srt <span class="ot">&lt;-</span> <span class="fu">LoadH5Seurat</span>(<span class="at">file =</span> srt_path)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">Idents</span>(srt) <span class="ot">&lt;-</span> <span class="st">"predict_xgboost_subregion"</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(srt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>An object of class Seurat 
+21989 features across 3042 samples within 1 assay 
+Active assay: RNA (21989 features, 0 variable features)
+ 2 dimensional reductions calculated: densmap_logit, densmap_xgboost</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>srt <span class="ot">&lt;-</span> <span class="fu">NormalizeData</span>(srt)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>srt <span class="ot">&lt;-</span> <span class="fu">FindVariableFeatures</span>(srt, <span class="at">selection.method =</span> <span class="st">"vst"</span>, <span class="at">nfeatures =</span> <span class="dv">3000</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>all.genes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(srt)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>srt <span class="ot">&lt;-</span> <span class="fu">ScaleData</span>(srt, <span class="at">features =</span> all.genes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create sex-related gene sets</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>male_genes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Eif2s3y"</span>, <span class="st">"Ddx3y"</span>, <span class="st">"Uty"</span>, <span class="st">"Kdm5d"</span>, <span class="st">"Zfy"</span>, <span class="st">"Rps4y1"</span>, <span class="st">"Rps4y2"</span>, <span class="st">"Sry"</span>) <span class="sc">%&gt;%</span> .[. <span class="sc">%in%</span> <span class="fu">rownames</span>(srt)]</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>female_genes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Tsix"</span>, <span class="st">"Xist"</span>) <span class="sc">%&gt;%</span> .[. <span class="sc">%in%</span> <span class="fu">rownames</span>(srt)]</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Add module scores for male and female gene sets</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>srt <span class="ot">&lt;-</span> <span class="fu">AddModuleScore</span>(</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  srt,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">features =</span> male_genes,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">"Male_score"</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>srt <span class="ot">&lt;-</span> <span class="fu">AddModuleScore</span>(</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  srt,</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">features =</span> female_genes,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">"Female_score"</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">FeaturePlot_scCustom</span>(<span class="at">reduction =</span> <span class="st">"densmap_xgboost"</span>,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">na_cutoff =</span> <span class="cn">NA</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pt.size =</span> <span class="dv">4</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">order =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">alpha_na_exp =</span> <span class="fl">0.1</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">alpha_exp =</span> <span class="fl">0.35</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">seurat_object =</span> srt,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"Male_score1"</span>, <span class="st">"Female_score1"</span>),</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">colors_use =</span> srt<span class="sc">@</span>misc<span class="sc">$</span>expr_Colour_Pal</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="05-de_test-sex_files/figure-html/sex-featureplots-1.png" class="img-fluid figure-img" width="8400"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>classes <span class="ot">&lt;-</span> <span class="fu">levels</span>(srt)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>female_cells <span class="ot">&lt;-</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  classes <span class="sc">%&gt;%</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(<span class="sc">~</span> <span class="fu">quantile</span>(<span class="fu">subset</span>(srt, <span class="at">ident =</span> .x)<span class="sc">$</span>Female_score1, <span class="fl">0.8</span>))</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>female_cells <span class="ot">&lt;-</span> <span class="fu">simplify</span>(female_cells)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>female_cells</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>80% 80% 80% 80% 80% 80% 80% 80% 
+  0   0   0   0   0   0   0   0 </code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>male_cells <span class="ot">&lt;-</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  classes <span class="sc">%&gt;%</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(<span class="sc">~</span> <span class="fu">quantile</span>(<span class="fu">subset</span>(srt, <span class="at">ident =</span> .x)<span class="sc">$</span>Male_score1, <span class="fl">0.8</span>))</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>male_cells <span class="ot">&lt;-</span> <span class="fu">simplify</span>(male_cells)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>male_cells</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>        80%         80%         80%         80%         80%         80% 
+-0.09627210 -0.09192773 -0.09682306 -0.08988589 -0.09665113 -0.09383678 
+        80%         80% 
+-0.09789540 -0.07873564 </code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>female_cells <span class="ot">&lt;-</span> <span class="fu">WhichCells</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">object =</span> srt,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">expression =</span> Female_score1 <span class="sc">&gt;=</span> <span class="fu">quantile</span>(srt<span class="sc">$</span>Female_score1, <span class="fl">0.8</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">Idents</span>(<span class="at">object =</span> srt, <span class="at">cells =</span> female_cells) <span class="ot">&lt;-</span> <span class="st">"female"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>male_cells <span class="ot">&lt;-</span> <span class="fu">WhichCells</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">object =</span> srt,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">expression =</span> Male_score1 <span class="sc">&gt;=</span> <span class="fu">quantile</span>(srt<span class="sc">$</span>Male_score1, <span class="fl">0.8</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">Idents</span>(<span class="at">object =</span> srt, <span class="at">cells =</span> male_cells) <span class="ot">&lt;-</span> <span class="st">"male"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>srt <span class="ot">&lt;-</span> <span class="fu">subset</span>(<span class="at">x =</span> srt, <span class="at">idents =</span> <span class="fu">c</span>(<span class="st">"female"</span>, <span class="st">"male"</span>))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>srt<span class="sc">$</span>sex <span class="ot">&lt;-</span> <span class="fu">Idents</span>(srt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">FeaturePlot_scCustom</span>(<span class="at">reduction =</span> <span class="st">"densmap_xgboost"</span>,</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">na_cutoff =</span> <span class="cn">NA</span>,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pt.size =</span> <span class="dv">4</span>,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">order =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">alpha_na_exp =</span> <span class="fl">0.1</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">alpha_exp =</span> <span class="fl">0.35</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">seurat_object =</span> srt,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">features =</span> <span class="fu">c</span>(</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Cacybp"</span>, <span class="st">"S100a6"</span>, <span class="st">"S100a1"</span>,</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"S100a12"</span>, <span class="st">"S100b"</span>, <span class="st">"S100p"</span>,</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"S100a4"</span>, <span class="st">"S100a2"</span>, <span class="st">"S100a3"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    .[. <span class="sc">%in%</span> <span class="fu">rownames</span>(srt)],</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">split.by =</span> <span class="st">"sex"</span>,</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">colors_use =</span> srt<span class="sc">@</span>misc<span class="sc">$</span>expr_Colour_Pal</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="05-de_test-sex_files/figure-html/sex-featureplots-cacybp-1.png" class="img-fluid figure-img" width="4200"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run differential expression analysis between sexes</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>dimred_de <span class="ot">&lt;-</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  classes <span class="sc">%&gt;%</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(<span class="sc">~</span> <span class="fu">FindMarkers</span>(</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    srt,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">ident.1 =</span> <span class="st">"female"</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">ident.2 =</span> <span class="st">"male"</span>,</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">min.pct =</span> <span class="fl">0.15</span>,</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">logfc.threshold =</span> <span class="fl">0.25</span>,</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">test.use =</span> <span class="st">"MAST"</span>,</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">only.pos =</span> <span class="cn">TRUE</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rownames_to_column</span>(<span class="st">"gene"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">cluster =</span> .x))</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>dimred_de <span class="ot">&lt;-</span> <span class="fu">reduce</span>(dimred_de, bind_rows)</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Save differentially expressed genes</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(dimred_de, <span class="fu">here</span>(data_dir, <span class="fu">sprintf</span>(<span class="st">"resolved_subregions_by_microclusters/%s-male_vs_female-de_genes.csv"</span>, bioproject)))</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="fu">Idents</span>(srt) <span class="ot">&lt;-</span> <span class="st">"predict_xgboost_subregion"</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>all_markers_genes <span class="ot">&lt;-</span> dimred_de <span class="sc">%&gt;%</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(avg_log2FC)) <span class="sc">%&gt;%</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(gene, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cluster)</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>all_markers_genes2 <span class="ot">&lt;-</span> all_markers_genes <span class="sc">%&gt;%</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(gene <span class="sc">%in%</span> <span class="fu">c</span>(npr, nmr, genes.embed, transcription_factors)) <span class="sc">%&gt;%</span></span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cluster) <span class="sc">%&gt;%</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(avg_log2FC))</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>top_5 <span class="ot">&lt;-</span> all_markers_genes <span class="sc">%&gt;%</span></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cluster) <span class="sc">%&gt;%</span></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(avg_log2FC)) <span class="sc">%&gt;%</span></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>  .<span class="sc">$</span>gene</span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>top_30 <span class="ot">&lt;-</span> all_markers_genes <span class="sc">%&gt;%</span></span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cluster) <span class="sc">%&gt;%</span></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(avg_log2FC)) <span class="sc">%&gt;%</span></span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">30</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>  .<span class="sc">$</span>gene</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>top_5s <span class="ot">&lt;-</span> all_markers_genes2 <span class="sc">%&gt;%</span></span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cluster) <span class="sc">%&gt;%</span></span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(avg_log2FC)) <span class="sc">%&gt;%</span></span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>  .<span class="sc">$</span>gene</span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>top_30s <span class="ot">&lt;-</span> all_markers_genes2 <span class="sc">%&gt;%</span></span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cluster) <span class="sc">%&gt;%</span></span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(avg_log2FC)) <span class="sc">%&gt;%</span></span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">30</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>  .<span class="sc">$</span>gene</span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a>top_5</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Xist"  "Btg2"  "Csdc2" "Gm973" "Rftn2"</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>top_30</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Xist"    "Btg2"    "Csdc2"   "Gm973"   "Rftn2"   "Tjp1"    "Sertad2"
+ [8] "Cd38"    "Rab14"   "Cpeb2"   "Atf7ip"  "Clstn1"  "Tet2"    "Shisa4" 
+[15] "Tulp3"   "Ctsb"    "Gigyf2"  "Ppib"   </code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>top_5s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Sertad2" "Atf7ip" </code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>top_30s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Sertad2" "Atf7ip" </code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DotPlot</span>(<span class="at">object =</span> srt, <span class="at">features =</span> top_30, <span class="at">split.by =</span> <span class="st">"sex"</span>) <span class="sc">+</span> <span class="fu">RotatedAxis</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="05-de_test-sex_files/figure-html/plt-dotplot-gene-1.png" class="img-fluid figure-img" width="8400"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DotPlot</span>(<span class="at">object =</span> srt, <span class="at">features =</span> top_30s, <span class="at">split.by =</span> <span class="st">"sex"</span>) <span class="sc">+</span> <span class="fu">RotatedAxis</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="05-de_test-sex_files/figure-html/plt-dotplot-sgenes-1.png" class="img-fluid figure-img" width="8400"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DotPlot</span>(</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">object =</span> srt,</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">features =</span> <span class="fu">c</span>(</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Cacybp"</span>, <span class="st">"S100a6"</span>, <span class="st">"S100a1"</span>,</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"S100a12"</span>, <span class="st">"S100b"</span>, <span class="st">"S100p"</span>,</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"S100a4"</span>, <span class="st">"S100a2"</span>, <span class="st">"S100a3"</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    .[. <span class="sc">%in%</span> <span class="fu">rownames</span>(srt)],</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">split.by =</span> <span class="st">"sex"</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span> <span class="fu">RotatedAxis</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="05-de_test-sex_files/figure-html/plt-dotplot-cacybp-1.png" class="img-fluid figure-img" width="4800"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Iterate_FeaturePlot_scCustom</span>(<span class="at">reduction =</span> <span class="st">"densmap_xgboost"</span>,</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">na_cutoff =</span> <span class="cn">NA</span>,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pt.size =</span> <span class="dv">4</span>,</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">order =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">alpha_na_exp =</span> <span class="fl">0.1</span>,</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">alpha_exp =</span> <span class="fl">0.75</span>, <span class="at">seurat_object =</span> srt, <span class="at">gene_list =</span> top_30, <span class="at">single_pdf =</span> <span class="cn">FALSE</span>, <span class="at">file_path =</span> plots_dir, <span class="at">file_type=</span><span class="st">".pdf"</span>, <span class="at">file_name =</span> <span class="fu">sprintf</span>(<span class="st">"%s.pdf"</span>, bioproject), <span class="at">colors_use =</span> srt<span class="sc">@</span>misc<span class="sc">$</span>expr_Colour_Pal</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DotPlot</span>(<span class="at">object =</span> srt, <span class="at">features =</span> npr[npr <span class="sc">%in%</span> <span class="fu">rownames</span>(srt)], <span class="at">split.by =</span> <span class="st">"sex"</span>) <span class="sc">+</span> <span class="fu">RotatedAxis</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="05-de_test-sex_files/figure-html/plt-dotplot-dendrogram-genes-npr-1.png" class="img-fluid figure-img" width="9600"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DotPlot</span>(<span class="at">object =</span> srt, <span class="at">features =</span> nmr[nmr <span class="sc">%in%</span> <span class="fu">rownames</span>(srt)], <span class="at">split.by =</span> <span class="st">"sex"</span>) <span class="sc">+</span> <span class="fu">RotatedAxis</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="05-de_test-sex_files/figure-html/plt-dotplot-dendrogram-genes-nmr-1.png" class="img-fluid figure-img" width="13200"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DotPlot</span>(<span class="at">object =</span> srt, <span class="at">features =</span> genes.embed[genes.embed <span class="sc">%in%</span> <span class="fu">rownames</span>(srt)], <span class="at">split.by =</span> <span class="st">"sex"</span>) <span class="sc">+</span> <span class="fu">RotatedAxis</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="05-de_test-sex_files/figure-html/plt-dotplot-dendrogram-genes-adgen-1.png" class="img-fluid figure-img" width="12600"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="session-information" class="level2">
+<h2 class="anchored" data-anchor-id="session-information">Session information</h2>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>sI <span class="ot">&lt;-</span> sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>sI<span class="sc">$</span>loadedOnly <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(sI, <span class="at">locale =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.2.2 (2022-10-31)
+ os       Ubuntu 22.04.2 LTS
+ system   x86_64, linux-gnu
+ ui       X11
+ language en_US:en
+ collate  en_US.UTF-8
+ ctype    en_US.UTF-8
+ tz       Etc/UTC
+ date     2023-06-28
+ pandoc   2.19.2 @ /opt/python/3.8.8/bin/ (via rmarkdown)
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ package              * version     date (UTC) lib source
+ abind                  1.4-5       2016-07-21 [1] RSPM (R 4.2.0)
+ anndata              * 0.7.5.6     2023-03-17 [1] RSPM (R 4.2.0)
+ assertthat             0.2.1       2019-03-21 [1] RSPM (R 4.2.0)
+ base64enc              0.1-3       2015-07-28 [1] RSPM (R 4.2.0)
+ bayestestR             0.13.1      2023-04-30 [1] https://easystats.r-universe.dev (R 4.2.2)
+ beeswarm               0.4.0       2021-06-01 [1] RSPM (R 4.2.0)
+ Biobase                2.58.0      2022-11-01 [1] RSPM (R 4.2.2)
+ BiocGenerics           0.44.0      2022-11-01 [1] RSPM (R 4.2.2)
+ BiocManager            1.30.20     2023-02-24 [1] RSPM (R 4.2.0)
+ bit                    4.0.5       2022-11-15 [1] RSPM (R 4.2.0)
+ bit64                  4.0.5       2020-08-30 [1] RSPM (R 4.2.0)
+ bitops                 1.0-7       2021-04-24 [1] RSPM (R 4.2.0)
+ circlize               0.4.15      2022-05-10 [1] RSPM (R 4.2.0)
+ cli                    3.6.1       2023-03-23 [1] RSPM (R 4.2.0)
+ cluster                2.1.4       2022-08-22 [1] RSPM (R 4.2.0)
+ coda                   0.19-4      2020-09-30 [1] RSPM (R 4.2.0)
+ codetools              0.2-19      2023-02-01 [1] RSPM (R 4.2.0)
+ colorspace             2.1-0       2023-01-23 [1] RSPM (R 4.2.0)
+ correlation            0.8.4       2023-04-30 [1] Github (easystats/correlation@3d5cd1e)
+ cowplot              * 1.1.1       2020-12-30 [1] RSPM (R 4.2.0)
+ crayon                 1.5.2       2022-09-29 [1] RSPM (R 4.2.0)
+ data.table             1.14.8      2023-02-17 [1] RSPM (R 4.2.0)
+ datawizard             0.7.1       2023-04-03 [1] RSPM (R 4.2.0)
+ DelayedArray           0.24.0      2022-11-01 [1] RSPM (R 4.2.2)
+ deldir                 1.0-6       2021-10-23 [1] RSPM (R 4.2.0)
+ digest                 0.6.31      2022-12-11 [1] RSPM (R 4.2.0)
+ dplyr                * 1.1.2       2023-04-20 [1] RSPM (R 4.2.2)
+ ellipsis               0.3.2       2021-04-29 [1] RSPM (R 4.2.0)
+ emmeans                1.8.5       2023-03-08 [1] RSPM (R 4.2.0)
+ estimability           1.4.1       2022-08-05 [1] RSPM (R 4.2.0)
+ evaluate               0.20        2023-01-17 [1] RSPM (R 4.2.0)
+ fansi                  1.0.4       2023-01-22 [1] RSPM (R 4.2.0)
+ farver                 2.1.1       2022-07-06 [1] RSPM (R 4.2.0)
+ fastmap                1.1.1       2023-02-24 [1] RSPM (R 4.2.0)
+ fitdistrplus           1.1-11      2023-04-25 [1] RSPM (R 4.2.2)
+ forcats              * 1.0.0       2023-01-29 [1] RSPM (R 4.2.0)
+ future               * 1.32.0      2023-03-07 [1] RSPM (R 4.2.0)
+ future.apply           1.10.0      2022-11-05 [1] RSPM (R 4.2.0)
+ generics               0.1.3       2022-07-05 [1] RSPM (R 4.2.0)
+ GenomeInfoDb           1.34.9      2023-02-02 [1] RSPM (R 4.2.2)
+ GenomeInfoDbData       1.2.9       2023-04-30 [1] RSPM (R 4.2.2)
+ GenomicRanges          1.50.2      2022-12-16 [1] RSPM (R 4.2.2)
+ ggbeeswarm             0.7.2       2023-04-30 [1] Github (eclarke/ggbeeswarm@3cf58a9)
+ ggmin                  0.0.0.9000  2023-04-30 [1] Github (sjessa/ggmin@8ada274)
+ ggplot2              * 3.4.2       2023-04-03 [1] RSPM (R 4.2.0)
+ ggprism                1.0.4       2023-04-30 [1] Github (csdaw/ggprism@0e411f4)
+ ggrastr                1.0.1       2023-04-30 [1] Github (VPetukhov/ggrastr@7aed9af)
+ ggrepel                0.9.2.9999  2023-04-30 [1] Github (slowkow/ggrepel@fe3b5c3)
+ ggridges               0.5.4       2022-09-26 [1] RSPM (R 4.2.0)
+ ggstatsplot          * 0.11.1.9000 2023-04-30 [1] Github (IndrajeetPatil/ggstatsplot@befe812)
+ GlobalOptions          0.1.2       2020-06-10 [1] RSPM (R 4.2.0)
+ globals                0.16.2      2022-11-21 [1] RSPM (R 4.2.0)
+ glue                   1.6.2       2022-02-24 [1] RSPM (R 4.2.0)
+ goftest                1.2-3       2021-10-07 [1] RSPM (R 4.2.0)
+ gridExtra              2.3         2017-09-09 [1] RSPM (R 4.2.0)
+ gtable                 0.3.3       2023-03-21 [1] RSPM (R 4.2.0)
+ hdf5r                  1.3.8       2023-01-21 [1] RSPM (R 4.2.2)
+ here                 * 1.0.1       2020-12-13 [1] RSPM (R 4.2.0)
+ hms                    1.1.3       2023-03-21 [1] RSPM (R 4.2.0)
+ htmltools              0.5.5       2023-03-23 [1] RSPM (R 4.2.0)
+ htmlwidgets            1.6.2       2023-03-17 [1] RSPM (R 4.2.0)
+ httpuv                 1.6.9       2023-02-14 [1] RSPM (R 4.2.0)
+ httr                   1.4.5       2023-02-24 [1] RSPM (R 4.2.0)
+ ica                    1.0-3       2022-07-08 [1] RSPM (R 4.2.0)
+ igraph                 1.4.1       2023-02-24 [1] RSPM (R 4.2.0)
+ insight                0.19.1      2023-03-18 [1] RSPM (R 4.2.0)
+ IRanges                2.32.0      2022-11-01 [1] RSPM (R 4.2.2)
+ irlba                  2.3.5.1     2022-10-03 [1] RSPM (R 4.2.0)
+ janitor                2.2.0.9000  2023-04-30 [1] Github (sfirke/janitor@d64c8bb)
+ jsonlite               1.8.4       2022-12-06 [1] RSPM (R 4.2.0)
+ KernSmooth             2.23-20     2021-05-03 [1] RSPM (R 4.2.0)
+ knitr                  1.42        2023-01-25 [1] RSPM (R 4.2.0)
+ labeling               0.4.2       2020-10-20 [1] RSPM (R 4.2.0)
+ later                  1.3.0       2021-08-18 [1] RSPM (R 4.2.0)
+ lattice                0.21-8      2023-04-05 [1] RSPM (R 4.2.0)
+ lazyeval               0.2.2       2019-03-15 [1] RSPM (R 4.2.0)
+ leiden                 0.4.3       2022-09-10 [1] RSPM (R 4.2.0)
+ lifecycle              1.0.3       2022-10-07 [1] RSPM (R 4.2.0)
+ listenv                0.9.0       2022-12-16 [1] RSPM (R 4.2.0)
+ lmtest                 0.9-40      2022-03-21 [1] RSPM (R 4.2.0)
+ lubridate            * 1.9.2       2023-02-10 [1] RSPM (R 4.2.0)
+ magrittr             * 2.0.3       2022-03-30 [1] RSPM (R 4.2.0)
+ MASS                   7.3-58.1    2022-08-03 [1] CRAN (R 4.2.2)
+ MAST                   1.24.1      2023-01-23 [1] RSPM (R 4.2.2)
+ Matrix                 1.5-4       2023-04-04 [1] RSPM (R 4.2.0)
+ MatrixGenerics         1.10.0      2022-11-01 [1] RSPM (R 4.2.2)
+ matrixStats            0.63.0      2022-11-18 [1] RSPM (R 4.2.0)
+ mime                   0.12        2021-09-28 [1] RSPM (R 4.2.0)
+ miniUI                 0.1.1.1     2018-05-18 [1] RSPM (R 4.2.0)
+ multcomp               1.4-23      2023-03-09 [1] RSPM (R 4.2.0)
+ munsell                0.5.0       2018-06-12 [1] RSPM (R 4.2.0)
+ mvtnorm                1.1-3       2021-10-08 [1] RSPM (R 4.2.0)
+ nlme                   3.1-162     2023-01-31 [1] RSPM (R 4.2.0)
+ paletteer              1.5.0       2022-10-19 [1] RSPM (R 4.2.0)
+ parallelly             1.35.0      2023-03-23 [1] RSPM (R 4.2.0)
+ parameters             0.20.3      2023-04-05 [1] RSPM (R 4.2.0)
+ patchwork            * 1.1.2.9000  2023-04-30 [1] Github (thomasp85/patchwork@c14c960)
+ pbapply                1.7-0       2023-01-13 [1] RSPM (R 4.2.0)
+ pillar                 1.9.0       2023-03-22 [1] RSPM (R 4.2.0)
+ pkgconfig              2.0.3       2019-09-22 [1] RSPM (R 4.2.0)
+ plotly                 4.10.1      2022-11-07 [1] RSPM (R 4.2.0)
+ plyr                   1.8.8       2022-11-11 [1] RSPM (R 4.2.0)
+ png                    0.1-8       2022-11-29 [1] RSPM (R 4.2.0)
+ polyclip               1.10-4      2022-10-20 [1] RSPM (R 4.2.0)
+ prettyunits            1.1.1       2020-01-24 [1] RSPM (R 4.2.0)
+ progress               1.2.2       2019-05-16 [1] RSPM (R 4.2.0)
+ progressr              0.13.0      2023-01-10 [1] RSPM (R 4.2.0)
+ promises               1.2.0.1     2021-02-11 [1] RSPM (R 4.2.0)
+ purrr                * 1.0.1       2023-01-10 [1] RSPM (R 4.2.0)
+ R.methodsS3            1.8.2       2022-06-13 [1] RSPM (R 4.2.0)
+ R.oo                   1.25.0      2022-06-12 [1] RSPM (R 4.2.0)
+ R.utils                2.12.2      2022-11-11 [1] RSPM (R 4.2.0)
+ R6                     2.5.1       2021-08-19 [1] RSPM (R 4.2.0)
+ ragg                   1.2.5       2023-01-12 [1] RSPM (R 4.2.0)
+ RANN                   2.6.1       2019-01-08 [1] RSPM (R 4.2.0)
+ RColorBrewer         * 1.1-3       2022-04-03 [1] RSPM (R 4.2.0)
+ Rcpp                   1.0.10      2023-01-22 [1] RSPM (R 4.2.0)
+ RcppAnnoy              0.0.20      2022-10-27 [1] RSPM (R 4.2.0)
+ RCurl                  1.98-1.12   2023-03-27 [1] RSPM (R 4.2.0)
+ readr                * 2.1.4       2023-02-10 [1] RSPM (R 4.2.0)
+ rematch2               2.1.2       2020-05-01 [1] RSPM (R 4.2.0)
+ remotes                2.4.2       2021-11-30 [1] RSPM (R 4.2.0)
+ repr                   1.1.6       2023-01-26 [1] RSPM (R 4.2.0)
+ reshape2               1.4.4       2020-04-09 [1] RSPM (R 4.2.0)
+ reticulate           * 1.28-9000   2023-04-30 [1] Github (rstudio/reticulate@442c49f)
+ rlang                  1.1.0       2023-03-14 [1] RSPM (R 4.2.0)
+ rmarkdown              2.21        2023-03-26 [1] RSPM (R 4.2.0)
+ ROCR                   1.0-11      2020-05-02 [1] RSPM (R 4.2.0)
+ rprojroot              2.0.3       2022-04-02 [1] RSPM (R 4.2.0)
+ rsvd                   1.0.5       2021-04-16 [1] RSPM (R 4.2.0)
+ Rtsne                  0.16        2022-04-17 [1] RSPM (R 4.2.0)
+ S4Vectors              0.36.2      2023-02-26 [1] RSPM (R 4.2.2)
+ sandwich               3.0-2       2022-06-15 [1] RSPM (R 4.2.0)
+ scales                 1.2.1       2022-08-20 [1] RSPM (R 4.2.0)
+ scattermore            0.8         2022-02-14 [1] RSPM (R 4.2.0)
+ scCustomize          * 1.1.1       2023-04-30 [1] Github (samuel-marsh/scCustomize@d08268d)
+ sceasy               * 0.0.7       2023-04-30 [1] Github (cellgeni/sceasy@0cfc0e3)
+ sctransform            0.3.5       2022-09-21 [1] RSPM (R 4.2.0)
+ sessioninfo            1.2.2       2021-12-06 [1] RSPM (R 4.2.0)
+ Seurat               * 4.3.0       2022-11-18 [1] RSPM (R 4.2.2)
+ SeuratDisk           * 0.0.0.9020  2023-04-30 [1] Github (mojaveazure/seurat-disk@9b89970)
+ SeuratObject         * 4.1.3       2022-11-07 [1] RSPM (R 4.2.0)
+ SeuratWrappers       * 0.3.1       2023-04-30 [1] Github (satijalab/seurat-wrappers@d28512f)
+ shape                  1.4.6       2021-05-19 [1] RSPM (R 4.2.0)
+ shiny                  1.7.4       2022-12-15 [1] RSPM (R 4.2.0)
+ SingleCellExperiment   1.20.1      2023-03-17 [1] RSPM (R 4.2.2)
+ skimr                * 2.1.5       2023-04-30 [1] Github (ropensci/skimr@d5126aa)
+ snakecase              0.11.0      2019-05-25 [1] RSPM (R 4.2.0)
+ sp                     1.6-0       2023-01-19 [1] RSPM (R 4.2.0)
+ spatstat.data          3.0-1       2023-03-12 [1] RSPM (R 4.2.0)
+ spatstat.explore       3.1-0       2023-03-14 [1] RSPM (R 4.2.0)
+ spatstat.geom          3.1-0       2023-03-12 [1] RSPM (R 4.2.0)
+ spatstat.random        3.1-4       2023-03-13 [1] RSPM (R 4.2.0)
+ spatstat.sparse        3.0-1       2023-03-12 [1] RSPM (R 4.2.0)
+ spatstat.utils         3.0-2       2023-03-11 [1] RSPM (R 4.2.0)
+ statsExpressions       1.5.0       2023-02-19 [1] RSPM (R 4.2.0)
+ stringi                1.7.12      2023-01-11 [1] RSPM (R 4.2.0)
+ stringr              * 1.5.0       2022-12-02 [1] RSPM (R 4.2.0)
+ SummarizedExperiment   1.28.0      2022-11-01 [1] RSPM (R 4.2.2)
+ survival               3.5-5       2023-03-12 [1] RSPM (R 4.2.0)
+ systemfonts            1.0.4       2022-02-11 [1] RSPM (R 4.2.0)
+ tensor                 1.5         2012-05-05 [1] RSPM (R 4.2.0)
+ textshaping            0.3.6       2021-10-13 [1] RSPM (R 4.2.0)
+ TH.data                1.1-1       2022-04-26 [1] RSPM (R 4.2.0)
+ tibble               * 3.2.1       2023-03-20 [1] RSPM (R 4.2.0)
+ tidyr                * 1.3.0       2023-01-24 [1] RSPM (R 4.2.0)
+ tidyselect             1.2.0       2022-10-10 [1] RSPM (R 4.2.0)
+ tidyverse            * 2.0.0.9000  2023-04-30 [1] Github (tidyverse/tidyverse@8ec2e1f)
+ timechange             0.2.0       2023-01-11 [1] RSPM (R 4.2.0)
+ tzdb                   0.3.0       2022-03-28 [1] RSPM (R 4.2.0)
+ utf8                   1.2.3       2023-01-31 [1] RSPM (R 4.2.0)
+ uwot                   0.1.14      2022-08-22 [1] RSPM (R 4.2.0)
+ vctrs                  0.6.2       2023-04-19 [1] RSPM (R 4.2.2)
+ vipor                  0.4.5       2017-03-22 [1] RSPM (R 4.2.0)
+ viridis              * 0.6.2       2021-10-13 [1] RSPM (R 4.2.0)
+ viridisLite          * 0.4.1       2022-08-22 [1] RSPM (R 4.2.0)
+ vroom                  1.6.1       2023-01-22 [1] RSPM (R 4.2.0)
+ withr                  2.5.0       2022-03-03 [1] RSPM (R 4.2.0)
+ xfun                   0.39        2023-04-20 [1] RSPM (R 4.2.2)
+ xtable                 1.8-4       2019-04-21 [1] RSPM (R 4.2.0)
+ XVector                0.38.0      2022-11-01 [1] RSPM (R 4.2.2)
+ yaml                   2.3.7       2023-01-23 [1] RSPM (R 4.2.0)
+ zeallot                0.1.0       2018-01-28 [1] RSPM (R 4.2.0)
+ zlibbioc               1.44.0      2022-11-01 [1] RSPM (R 4.2.2)
+ zoo                    1.8-12      2023-04-13 [1] RSPM (R 4.2.2)
+
+ [1] /opt/R/4.2.2/lib/R/library
+
+─ Python configuration ───────────────────────────────────────────────────────
+ python:         /opt/python/3.8.8/bin/python
+ libpython:      /opt/python/3.8.8/lib/libpython3.8.so
+ pythonhome:     /opt/python/3.8.8:/opt/python/3.8.8
+ version:        3.8.8 | packaged by conda-forge | (default, Feb 20 2021, 16:22:27)  [GCC 9.3.0]
+ numpy:          /opt/python/3.8.8/lib/python3.8/site-packages/numpy
+ numpy_version:  1.23.5
+ scanpy:         /opt/python/3.8.8/lib/python3.8/site-packages/scanpy
+ 
+ NOTE: Python version was forced by RETICULATE_PYTHON
+
+──────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

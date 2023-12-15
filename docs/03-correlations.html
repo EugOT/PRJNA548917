@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.262">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Evgenii O. Tretiakov">
+<meta name="dcterms.date" content="2023-05-10">
+
+<title>Correlation analysis of Hypothalamus astrocytes dataset from Romanov RA et al 2020</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="03-correlations_files/libs/clipboard/clipboard.min.js"></script>
+<script src="03-correlations_files/libs/quarto-html/quarto.js"></script>
+<script src="03-correlations_files/libs/quarto-html/popper.min.js"></script>
+<script src="03-correlations_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="03-correlations_files/libs/quarto-html/anchor.min.js"></script>
+<link href="03-correlations_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="03-correlations_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="03-correlations_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="03-correlations_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="03-correlations_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+<link href="03-correlations_files/libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="03-correlations_files/libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#load-data-and-setup-parameters" id="toc-load-data-and-setup-parameters" class="nav-link active" data-scroll-target="#load-data-and-setup-parameters">Load data and setup parameters</a>
+  <ul class="collapse">
+  <li><a href="#set-paths" id="toc-set-paths" class="nav-link" data-scroll-target="#set-paths">Set paths</a></li>
+  <li><a href="#load-helper-functions-and-gene-sets" id="toc-load-helper-functions-and-gene-sets" class="nav-link" data-scroll-target="#load-helper-functions-and-gene-sets">Load helper functions and gene-sets</a></li>
+  <li><a href="#set-fixed-variables" id="toc-set-fixed-variables" class="nav-link" data-scroll-target="#set-fixed-variables">Set fixed variables</a></li>
+  </ul></li>
+  <li><a href="#load-selected-astrocytes-data-from-romanov-ra-et-al-2020" id="toc-load-selected-astrocytes-data-from-romanov-ra-et-al-2020" class="nav-link" data-scroll-target="#load-selected-astrocytes-data-from-romanov-ra-et-al-2020">Load selected astrocytes data from Romanov RA et al 2020</a>
+  <ul class="collapse">
+  <li><a href="#convert-adata-object-to-r-anndatar6-object." id="toc-convert-adata-object-to-r-anndatar6-object." class="nav-link" data-scroll-target="#convert-adata-object-to-r-anndatar6-object.">Convert adata object to R AnnDataR6 object.</a></li>
+  </ul></li>
+  <li><a href="#session-information" id="toc-session-information" class="nav-link" data-scroll-target="#session-information">Session information</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Correlation analysis of Hypothalamus astrocytes dataset from Romanov RA et al 2020</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Evgenii O. Tretiakov </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">May 10, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="load-data-and-setup-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="load-data-and-setup-parameters">Load data and setup parameters</h2>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load tidyverse infrastructure packages</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(future)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(here)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(magrittr)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(stringr)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(skimr)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(RColorBrewer)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Load packages for scRNA-seq analysis and visualisation</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(cowplot)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(patchwork)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(ggstatsplot)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(anndata)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(sceasy)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>sc <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">"scanpy"</span>, <span class="at">convert =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="set-paths" class="level3">
+<h3 class="anchored" data-anchor-id="set-paths">Set paths</h3>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>src_dir <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"code"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>data_dir <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"data"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>output_dir <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"output"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>plots_dir <span class="ot">&lt;-</span> <span class="fu">here</span>(output_dir, <span class="st">"figures"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>tables_dir <span class="ot">&lt;-</span> <span class="fu">here</span>(output_dir, <span class="st">"tables"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="load-helper-functions-and-gene-sets" class="level3">
+<h3 class="anchored" data-anchor-id="load-helper-functions-and-gene-sets">Load helper functions and gene-sets</h3>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">here</span>(src_dir, <span class="st">"genes.R"</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">here</span>(src_dir, <span class="st">"functions.R"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="set-fixed-variables" class="level3">
+<h3 class="anchored" data-anchor-id="set-fixed-variables">Set fixed variables</h3>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># set seed</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>reseed <span class="ot">&lt;-</span> <span class="dv">42</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="at">seed =</span> reseed)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters for parallel execution</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>n_cores <span class="ot">&lt;-</span> <span class="dv">32</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plan</span>(<span class="st">"multisession"</span>, <span class="at">workers =</span> n_cores)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">future.globals.maxSize =</span> <span class="dv">100000</span> <span class="sc">*</span> <span class="dv">1024</span><span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">future.rng.onMisuse =</span> <span class="st">"ignore"</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plan</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>multisession:
+- args: function (..., workers = 32, envir = parent.frame())
+- tweaked: TRUE
+- call: plan("multisession", workers = n_cores)</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot2 theme</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(ggmin<span class="sc">::</span><span class="fu">theme_powerpoint</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>bioproject <span class="ot">&lt;-</span> <span class="st">"PRJNA548917"</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>project <span class="ot">&lt;-</span> <span class="st">"romanov2020_Hypoth-dev"</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>cb_fpr <span class="ot">&lt;-</span> <span class="fl">0.001</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>low_cutoff_gene <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>high_cutoff_gene <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>high_cutoff_gene <span class="ot">&lt;-</span> <span class="dv">6000</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>low_cutoff_umis <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>low_cutoff_umis <span class="ot">&lt;-</span> <span class="sc">-</span><span class="cn">Inf</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>high_cutoff_umis <span class="ot">&lt;-</span> <span class="dv">20000</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>high_cutoff_pc_mt <span class="ot">&lt;-</span> <span class="dv">15</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>high_cutoff_pc_ribo <span class="ot">&lt;-</span> <span class="dv">15</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>high_cutoff_pc_hb <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>high_cutoff_doublet_score <span class="ot">&lt;-</span> <span class="fl">0.33</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>high_cutoff_complexity <span class="ot">&lt;-</span> <span class="fl">0.85</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="load-selected-astrocytes-data-from-romanov-ra-et-al-2020" class="level2">
+<h2 class="anchored" data-anchor-id="load-selected-astrocytes-data-from-romanov-ra-et-al-2020">Load selected astrocytes data from Romanov RA et al 2020</h2>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>anndata <span class="ot">&lt;-</span> sc<span class="sc">$</span><span class="fu">read</span>(<span class="fu">here</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  data_dir,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">"class_cello/%s-astrocytes_dataset-%s-initial_selection.h5ad"</span>, bioproject, cb_fpr)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="convert-adata-object-to-r-anndatar6-object." class="level3">
+<h3 class="anchored" data-anchor-id="convert-adata-object-to-r-anndatar6-object.">Convert adata object to R AnnDataR6 object.</h3>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>adata <span class="ot">&lt;-</span> <span class="fu">py_to_r</span>(anndata)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># X_norm &lt;- sc$pp$normalize_total(adata, target_sum = 1e+04, inplace = FALSE)["X"]</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pp<span class="sc">$</span><span class="fu">normalize_total</span>(adata, <span class="at">target_sum =</span> <span class="fl">1e+04</span>, <span class="at">inplace =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>None</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>sc<span class="sc">$</span>pp<span class="sc">$</span><span class="fu">log1p</span>(adata)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>None</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(adata)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "AnnDataR6" "R6"       </code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(adata<span class="sc">$</span>X)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "dgCMatrix"
+attr(,"package")
+[1] "Matrix"</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>adata</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>AnnData object with n_obs × n_vars = 3042 × 21989
+    obs: 'nCount_RAW', 'nFeature_RAW', 'nCount_RNA', 'nFeature_RNA', 'orig.ident', 'nFeature_Diff', 'nCount_Diff', 'percent_mito', 'percent_ribo', 'percent_mito_ribo', 'percent_hb', 'log10GenesPerUMI', 'cell_name', 'barcode', 'latent_RT_efficiency', 'latent_cell_probability', 'latent_scale', 'doublet_score', 'predicted_doublets', 'QC', 'var_regex', 'RNA_snn_res.0.5', 'RNA_snn_res.0.730162924108181', 'RNA_snn_res.1.22140339759076', 'RNA_snn_res.3.000001', 'seurat_clusters', 'k_tree', 'comb_clstr1', 'S.Score', 'G2M.Score', 'Phase', 'nCount_SCT', 'nFeature_SCT', 'SCT_snn_res.1', 'SCT_snn_res.1.10049753133357', 'SCT_snn_res.1.22022353686838', 'SCT_snn_res.1.36528036285893', 'SCT_snn_res.1.54465801813792', 'SCT_snn_res.1.77217142500043', 'SCT_snn_res.2.0701989287267', 'SCT_snn_res.2.47753434006845', 'SCT_snn_res.3.06781889081486', 'SCT_snn_res.4.00000100000001', 'bioproject', 'project', 'model', 'tech', 'region', 'sex', 'stage', 'libname', 'expbtch', 'condit', 'ora_celltype', 'train', 'test'
+    var: 'vst.mean', 'vst.variance', 'vst.variance.expected', 'vst.variance.standardized', 'vst.variable'
+    uns: 'k_tree_colors', 'name', 'ora_celltype_colors', 'log1p'
+    obsm: 'X_pacmap', 'X_pca', 'X_umap', 'ora_estimate', 'ora_pvals'</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>exp_mtx_fname <span class="ot">&lt;-</span> <span class="fu">here</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  data_dir,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">"%s-astrocytes_dataset-%s-expr-mtx.csv"</span>, bioproject, cb_fpr)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">as.matrix</span>(adata<span class="sc">$</span>X))</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>readr<span class="sc">::</span><span class="fu">write_csv</span>(X, <span class="at">file =</span> exp_mtx_fname)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># X &lt;- as.data.frame(py_to_r(X_norm))</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co"># colnames(X) &lt;- colnames(adata$X)</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> X[, <span class="fu">c</span>(npr, nmr, genes.embed) <span class="sc">%&gt;%</span> .[. <span class="sc">%in%</span> <span class="fu">colnames</span>(X)]]</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> X[, <span class="fu">colSums</span>(X) <span class="sc">&gt;</span> <span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>cdata <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(adata<span class="sc">$</span>obs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">cbind</span>(cdata, X)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 3,042
+Columns: 209
+$ nCount_RAW                    &lt;dbl&gt; 1088, 1073, 1343, 1219, 857, 973, 854, 9…
+$ nFeature_RAW                  &lt;int&gt; 697, 734, 800, 779, 576, 694, 565, 679, …
+$ nCount_RNA                    &lt;dbl&gt; 1074, 1057, 1321, 1193, 829, 954, 822, 9…
+$ nFeature_RNA                  &lt;int&gt; 687, 723, 784, 757, 551, 677, 537, 671, …
+$ orig.ident                    &lt;fct&gt; SRR9303102, SRR9303102, SRR9303102, SRR9…
+$ nFeature_Diff                 &lt;int&gt; 10, 11, 16, 22, 25, 17, 28, 8, 14, 28, 1…
+$ nCount_Diff                   &lt;dbl&gt; 14, 16, 22, 26, 28, 19, 32, 8, 23, 33, 2…
+$ percent_mito                  &lt;dbl&gt; 2.1415270, 1.7975402, 2.8766086, 4.44258…
+$ percent_ribo                  &lt;dbl&gt; 0.93109870, 1.60832545, 1.13550341, 0.25…
+$ percent_mito_ribo             &lt;dbl&gt; 3.0726257, 3.4058657, 4.0121120, 4.69404…
+$ percent_hb                    &lt;dbl&gt; 0.00000000, 0.00000000, 0.00000000, 0.00…
+$ log10GenesPerUMI              &lt;dbl&gt; 0.9359791, 0.9454588, 0.9273970, 0.93579…
+$ cell_name                     &lt;chr&gt; "SRR9303102_AAACCTGAGCGAGAAA-1", "SRR930…
+$ barcode                       &lt;fct&gt; AAACCTGAGCGAGAAA-1, AAACGGGCATACGCTA-1, …
+$ latent_RT_efficiency          &lt;dbl&gt; 0.9492273, 0.9183263, 1.0439931, 0.99423…
+$ latent_cell_probability       &lt;dbl&gt; 0.9993626, 0.9995431, 0.9996901, 0.99939…
+$ latent_scale                  &lt;dbl&gt; 1968.826, 1943.741, 1967.100, 2019.061, …
+$ doublet_score                 &lt;dbl&gt; 0.01962277, 0.02023953, 0.02833126, 0.03…
+$ predicted_doublets            &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ QC                            &lt;fct&gt; Pass, Pass, Pass, Pass, Pass, Pass, Pass…
+$ var_regex                     &lt;dbl&gt; 4.283054, 4.257332, 4.542014, 6.370495, …
+$ RNA_snn_res.0.5               &lt;fct&gt; 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3…
+$ RNA_snn_res.0.730162924108181 &lt;fct&gt; 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3…
+$ RNA_snn_res.1.22140339759076  &lt;fct&gt; 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3…
+$ RNA_snn_res.3.000001          &lt;fct&gt; 10, 26, 6, 6, 10, 10, 6, 10, 6, 6, 10, 6…
+$ seurat_clusters               &lt;fct&gt; 1, 30, 1, 1, 10, 10, 10, 10, 1, 10, 10, …
+$ k_tree                        &lt;fct&gt; 3, 3, 3, 3, 14, 14, 14, 14, 3, 14, 14, 3…
+$ comb_clstr1                   &lt;fct&gt; 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3…
+$ S.Score                       &lt;dbl&gt; -0.026347416, -0.034017889, -0.018314668…
+$ G2M.Score                     &lt;dbl&gt; -0.022565376, -0.062275226, -0.060596679…
+$ Phase                         &lt;fct&gt; G1, G1, G1, G1, G1, S, G1, G1, S, G1, G1…
+$ nCount_SCT                    &lt;dbl&gt; 1934, 1913, 1850, 1827, 1716, 1797, 1691…
+$ nFeature_SCT                  &lt;int&gt; 682, 715, 779, 745, 559, 677, 548, 666, …
+$ SCT_snn_res.1                 &lt;fct&gt; 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4…
+$ SCT_snn_res.1.10049753133357  &lt;fct&gt; 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4…
+$ SCT_snn_res.1.22022353686838  &lt;fct&gt; 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4…
+$ SCT_snn_res.1.36528036285893  &lt;fct&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2…
+$ SCT_snn_res.1.54465801813792  &lt;fct&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2…
+$ SCT_snn_res.1.77217142500043  &lt;fct&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2…
+$ SCT_snn_res.2.0701989287267   &lt;fct&gt; 4, 4, 4, 4, 14, 14, 14, 14, 4, 14, 14, 4…
+$ SCT_snn_res.2.47753434006845  &lt;fct&gt; 3, 3, 3, 3, 14, 14, 14, 14, 3, 14, 14, 3…
+$ SCT_snn_res.3.06781889081486  &lt;fct&gt; 2, 2, 2, 2, 14, 14, 14, 14, 2, 14, 14, 2…
+$ SCT_snn_res.4.00000100000001  &lt;fct&gt; 1, 30, 1, 1, 10, 10, 10, 10, 1, 10, 10, …
+$ bioproject                    &lt;fct&gt; PRJNA548917, PRJNA548917, PRJNA548917, P…
+$ project                       &lt;fct&gt; romanov2020_Hypoth-dev, romanov2020_Hypo…
+$ model                         &lt;fct&gt; Illumina HiSeq 4000, Illumina HiSeq 4000…
+$ tech                          &lt;fct&gt; 10XV2, 10XV2, 10XV2, 10XV2, 10XV2, 10XV2…
+$ region                        &lt;fct&gt; Hypoth, Hypoth, Hypoth, Hypoth, Hypoth, …
+$ sex                           &lt;dbl&gt; NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, …
+$ stage                         &lt;fct&gt; Juvenile, Juvenile, Juvenile, Juvenile, …
+$ libname                       &lt;fct&gt; P10, P10, P10, P10, P10, P10, P10, P10, …
+$ expbtch                       &lt;fct&gt; A, A, A, A, A, A, A, A, A, A, A, A, A, A…
+$ condit                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ ora_celltype                  &lt;fct&gt; Astrocytes, Astrocytes, Astrocytes, Astr…
+$ train                         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, …
+$ test                          &lt;lgl&gt; TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FA…
+$ Adcyap1r1                     &lt;dbl&gt; 0.000000, 0.000000, 2.148270, 2.877200, …
+$ Cckbr                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Cntfr                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Crhr1                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Crhr2                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Esr1                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Galr1                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Ghr                           &lt;dbl&gt; 2.976650, 0.000000, 0.000000, 0.000000, …
+$ Grpr                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Hcrtr1                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Kiss1r                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Mc4r                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Mchr1                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Nmbr                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Nmur1                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Nmur2                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Npffr1                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Npy1r                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Ntrk2                         &lt;dbl&gt; 0.000000, 0.000000, 2.148270, 2.238817, …
+$ Ntsr2                         &lt;dbl&gt; 0.000000, 2.991798, 0.000000, 0.000000, …
+$ Oprd1                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Oprl1                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Oxtr                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Sstr2                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Tacr1                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Tacr3                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Trhr                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Vipr2                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Gria1                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 2.238817, …
+$ Gria2                         &lt;dbl&gt; 3.861886, 0.000000, 0.000000, 2.877200, …
+$ Gria3                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Gria4                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Grid1                         &lt;dbl&gt; 0.000000, 0.000000, 2.148270, 0.000000, …
+$ Grid2                         &lt;dbl&gt; 2.976650, 3.877508, 3.165900, 2.238817, …
+$ Grik1                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Grik2                         &lt;dbl&gt; 0.000000, 2.991798, 0.000000, 2.238817, …
+$ Grik3                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Grik4                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Grik5                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Grin1                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Grin2a                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Grin2b                        &lt;dbl&gt; 0.000000, 0.000000, 2.148270, 0.000000, …
+$ Grin2c                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Grin2d                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Grin3a                        &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Grin3b                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Grm1                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Grm5                          &lt;dbl&gt; 4.192331, 0.000000, 2.148270, 2.238817, …
+$ Grm3                          &lt;dbl&gt; 2.976650, 3.380389, 2.781303, 2.238817, …
+$ Grm4                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Grm7                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Gabra2                        &lt;dbl&gt; 2.976650, 0.000000, 0.000000, 0.000000, …
+$ Gabra3                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Gabra4                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Gabra5                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Gabrb1                        &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 2.238817, …
+$ Gabrb2                        &lt;dbl&gt; 0.000000, 0.000000, 2.148270, 0.000000, …
+$ Gabrb3                        &lt;dbl&gt; 0.000000, 0.000000, 2.148270, 0.000000, …
+$ Gabrg1                        &lt;dbl&gt; 2.333210, 0.000000, 2.148270, 0.000000, …
+$ Gabrg2                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Gabrg3                        &lt;dbl&gt; 2.333210, 2.347629, 0.000000, 2.238817, …
+$ Gabrd                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Gabrp                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Gabrr2                        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Gabbr1                        &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 2.238817, …
+$ Gabbr2                        &lt;dbl&gt; 0.000000, 2.347629, 0.000000, 2.238817, …
+$ Drd1                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Drd2                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Drd5                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Htr1b                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Htr1f                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Htr2a                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Htr2b                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Htr5a                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Htr5b                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Gnai1                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Gnai2                         &lt;dbl&gt; 0.000000, 0.000000, 3.165900, 0.000000, …
+$ Gnai3                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 2.877200, …
+$ Gnao1                         &lt;dbl&gt; 2.333210, 2.347629, 0.000000, 0.000000, …
+$ Gnaz                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Abcd1                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Abcd2                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Abcd3                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Acaa2                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Acox1                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Agt                           &lt;dbl&gt; 3.364981, 0.000000, 2.148270, 3.541797, …
+$ Aldh1a1                       &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Aldh1l1                       &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Aldoc                         &lt;dbl&gt; 2.333210, 0.000000, 0.000000, 3.759132, …
+$ Apoe                          &lt;dbl&gt; 5.845012, 5.651865, 5.811383, 5.655977, …
+$ Aqp4                          &lt;dbl&gt; 0.000000, 2.991798, 2.148270, 0.000000, …
+$ Ckb                           &lt;dbl&gt; 0.000000, 2.991798, 2.148270, 3.263723, …
+$ Cnr1                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Cst3                          &lt;dbl&gt; 3.364981, 4.560250, 3.659711, 4.220358, …
+$ Dagla                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Daglb                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Decr2                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Dnm1                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Ech1                          &lt;dbl&gt; 0.000000, 0.000000, 2.148270, 0.000000, …
+$ Egfr                          &lt;dbl&gt; 2.333210, 0.000000, 0.000000, 2.238817, …
+$ Eno1                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Faah                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Fgfr3                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Fis1                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Fos                           &lt;dbl&gt; 0.000000, 2.991798, 0.000000, 0.000000, …
+$ Fth1                          &lt;dbl&gt; 2.976650, 0.000000, 0.000000, 0.000000, …
+$ Ftl1                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Gfap                          &lt;dbl&gt; 0.000000, 2.991798, 0.000000, 0.000000, …
+$ Gja1                          &lt;dbl&gt; 0.000000, 2.347629, 0.000000, 2.877200, …
+$ Gli1                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Glul                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Hacd2                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Hadhb                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Hepacam                       &lt;dbl&gt; 0.000000, 2.347629, 0.000000, 0.000000, …
+$ Htra1                         &lt;dbl&gt; 0.000000, 2.347629, 0.000000, 0.000000, …
+$ Lcat                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Lpcat3                        &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Lxn                           &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Mfn1                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Mfn2                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Mgll                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Mief1                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Napepld                       &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Ndrg2                         &lt;dbl&gt; 2.333210, 3.380389, 3.165900, 2.877200, …
+$ Nfia                          &lt;dbl&gt; 3.643985, 2.991798, 2.781303, 3.263723, …
+$ Opa1                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Pex1                          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Pex10                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Pex12                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ Pex13                         &lt;dbl&gt; 2.333210, 0.000000, 0.000000, 0.000000, …
+$ Pex14                         &lt;dbl&gt; 0.000000, 0.000000, 2.148270, 0.000000, …
+$ Pex16                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Pex2                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 2.238817, …
+$ Pex26                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Pex3                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Pex6                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Pla2g7                        &lt;dbl&gt; 2.333210, 0.000000, 2.781303, 3.263723, …
+$ Plcb1                         &lt;dbl&gt; 0.000000, 2.347629, 0.000000, 0.000000, …
+$ Pygb                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ S100a6                        &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ S100b                         &lt;dbl&gt; 2.333210, 0.000000, 2.148270, 0.000000, …
+$ Scd2                          &lt;dbl&gt; 2.976650, 3.380389, 3.165900, 2.238817, …
+$ Sgcd                          &lt;dbl&gt; 0.000000, 2.347629, 0.000000, 0.000000, …
+$ Slc1a2                        &lt;dbl&gt; 0.000000, 2.347629, 2.781303, 2.238817, …
+$ Slc1a3                        &lt;dbl&gt; 2.976650, 3.380389, 3.442982, 4.088923, …
+$ Slc38a1                       &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Slc6a11                       &lt;dbl&gt; 2.333210, 3.380389, 2.781303, 3.263723, …
+$ Slit1                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Slit2                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Sox9                          &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Tafa1                         &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Tkt                           &lt;dbl&gt; 0.000000, 0.000000, 0.000000, 0.000000, …
+$ Trpv1                         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center" data-fig.asp="1.236">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>plt_grp_ggcorrmat <span class="ot">&lt;-</span> <span class="fu">grouped_ggcorrmat</span>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="do">## arguments relevant for `ggcorrmat()`</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> df, <span class="at">type =</span> <span class="st">"r"</span>,</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">cor.vars =</span> <span class="fu">c</span>(nCount_RNA<span class="sc">:</span>log10GenesPerUMI, Adcyap1r1<span class="sc">:</span>Tkt),</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">grouping.var =</span> libname,</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="do">## arguments relevant for `combine_plots()`</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">plotgrid.args =</span> <span class="fu">list</span>(<span class="at">nrow =</span> <span class="dv">2</span>),</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">annotation.args =</span> <span class="fu">list</span>(</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">tag_levels =</span> <span class="st">"a"</span>,</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Relationship between astrocytic functional states markers, neuromediators </span><span class="sc">\n</span><span class="st">and neuropeptides receptors, metabolic enzymes and the metadata QC-metrics"</span>,</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"Dataset: subset of astrocytes from the Hypothalamus of the mouse hypothalamus (Romanov RA et al 2020)"</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>plt_grp_ggcorrmat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="03-correlations_files/figure-html/plot-corrmatrix-1.png" class="img-fluid figure-img" width="8400"></p>
+<p></p><figcaption class="figure-caption">Correlation matrix of the metadata QC-metrics and the gene set of interest: neuromediators/neuropeptides receptors, metabolic enzymes and other markers of astocytic functional states</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">save_my_plot</span>(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> bioproject,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">plt =</span> plt_grp_ggcorrmat,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"stat-corrmatrix-plt"</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">h =</span> <span class="dv">120</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">asp =</span> .<span class="dv">809</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="session-information" class="level2">
+<h2 class="anchored" data-anchor-id="session-information">Session information</h2>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>sI <span class="ot">&lt;-</span> sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>sI<span class="sc">$</span>loadedOnly <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(sI, <span class="at">locale =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.2.2 (2022-10-31)
+ os       Ubuntu 22.04.2 LTS
+ system   x86_64, linux-gnu
+ ui       X11
+ language en_US:en
+ collate  en_US.UTF-8
+ ctype    en_US.UTF-8
+ tz       Etc/UTC
+ date     2023-05-10
+ pandoc   2.19.2 @ /opt/python/3.8.8/bin/ (via rmarkdown)
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ package          * version     date (UTC) lib source
+ anndata          * 0.7.5.6     2023-03-17 [1] RSPM (R 4.2.0)
+ assertthat         0.2.1       2019-03-21 [1] RSPM (R 4.2.0)
+ base64enc          0.1-3       2015-07-28 [1] RSPM (R 4.2.0)
+ bayestestR         0.13.1      2023-04-30 [1] https://easystats.r-universe.dev (R 4.2.2)
+ bit                4.0.5       2022-11-15 [1] RSPM (R 4.2.0)
+ bit64              4.0.5       2020-08-30 [1] RSPM (R 4.2.0)
+ callr              3.7.3       2022-11-02 [1] RSPM (R 4.2.0)
+ cli                3.6.1       2023-03-23 [1] RSPM (R 4.2.0)
+ coda               0.19-4      2020-09-30 [1] RSPM (R 4.2.0)
+ codetools          0.2-19      2023-02-01 [1] RSPM (R 4.2.0)
+ colorspace         2.1-0       2023-01-23 [1] RSPM (R 4.2.0)
+ correlation        0.8.4       2023-04-30 [1] Github (easystats/correlation@3d5cd1e)
+ cowplot          * 1.1.1       2020-12-30 [1] RSPM (R 4.2.0)
+ crayon             1.5.2       2022-09-29 [1] RSPM (R 4.2.0)
+ datawizard         0.7.1       2023-04-03 [1] RSPM (R 4.2.0)
+ digest             0.6.31      2022-12-11 [1] RSPM (R 4.2.0)
+ dplyr            * 1.1.2       2023-04-20 [1] RSPM (R 4.2.2)
+ emmeans            1.8.5       2023-03-08 [1] RSPM (R 4.2.0)
+ estimability       1.4.1       2022-08-05 [1] RSPM (R 4.2.0)
+ evaluate           0.20        2023-01-17 [1] RSPM (R 4.2.0)
+ fansi              1.0.4       2023-01-22 [1] RSPM (R 4.2.0)
+ farver             2.1.1       2022-07-06 [1] RSPM (R 4.2.0)
+ fastmap            1.1.1       2023-02-24 [1] RSPM (R 4.2.0)
+ forcats          * 1.0.0       2023-01-29 [1] RSPM (R 4.2.0)
+ fs                 1.6.2       2023-04-25 [1] RSPM (R 4.2.2)
+ future           * 1.32.0      2023-03-07 [1] RSPM (R 4.2.0)
+ generics           0.1.3       2022-07-05 [1] RSPM (R 4.2.0)
+ getPass            0.2-2       2017-07-21 [1] RSPM (R 4.2.0)
+ ggcorrplot         0.1.4.999   2023-04-30 [1] Github (kassambara/ggcorrplot@0a85456)
+ ggmin              0.0.0.9000  2023-04-30 [1] Github (sjessa/ggmin@8ada274)
+ ggplot2          * 3.4.2       2023-04-03 [1] RSPM (R 4.2.0)
+ ggstatsplot      * 0.11.1.9000 2023-04-30 [1] Github (IndrajeetPatil/ggstatsplot@befe812)
+ git2r              0.31.0      2023-01-26 [1] RSPM (R 4.2.0)
+ globals            0.16.2      2022-11-21 [1] RSPM (R 4.2.0)
+ glue               1.6.2       2022-02-24 [1] RSPM (R 4.2.0)
+ gtable             0.3.3       2023-03-21 [1] RSPM (R 4.2.0)
+ here             * 1.0.1       2020-12-13 [1] RSPM (R 4.2.0)
+ hms                1.1.3       2023-03-21 [1] RSPM (R 4.2.0)
+ htmltools          0.5.5       2023-03-23 [1] RSPM (R 4.2.0)
+ htmlwidgets        1.6.2       2023-03-17 [1] RSPM (R 4.2.0)
+ httpuv             1.6.9       2023-02-14 [1] RSPM (R 4.2.0)
+ httr               1.4.5       2023-02-24 [1] RSPM (R 4.2.0)
+ insight            0.19.1      2023-03-18 [1] RSPM (R 4.2.0)
+ jsonlite           1.8.4       2022-12-06 [1] RSPM (R 4.2.0)
+ knitr              1.42        2023-01-25 [1] RSPM (R 4.2.0)
+ labeling           0.4.2       2020-10-20 [1] RSPM (R 4.2.0)
+ later              1.3.0       2021-08-18 [1] RSPM (R 4.2.0)
+ lattice            0.21-8      2023-04-05 [1] RSPM (R 4.2.0)
+ lifecycle          1.0.3       2022-10-07 [1] RSPM (R 4.2.0)
+ listenv            0.9.0       2022-12-16 [1] RSPM (R 4.2.0)
+ lubridate        * 1.9.2       2023-02-10 [1] RSPM (R 4.2.0)
+ magrittr         * 2.0.3       2022-03-30 [1] RSPM (R 4.2.0)
+ MASS               7.3-58.1    2022-08-03 [1] CRAN (R 4.2.2)
+ Matrix             1.5-4       2023-04-04 [1] RSPM (R 4.2.0)
+ multcomp           1.4-23      2023-03-09 [1] RSPM (R 4.2.0)
+ munsell            0.5.0       2018-06-12 [1] RSPM (R 4.2.0)
+ mvtnorm            1.1-3       2021-10-08 [1] RSPM (R 4.2.0)
+ paletteer          1.5.0       2022-10-19 [1] RSPM (R 4.2.0)
+ parallelly         1.35.0      2023-03-23 [1] RSPM (R 4.2.0)
+ parameters         0.20.3      2023-04-05 [1] RSPM (R 4.2.0)
+ patchwork        * 1.1.2.9000  2023-04-30 [1] Github (thomasp85/patchwork@c14c960)
+ pillar             1.9.0       2023-03-22 [1] RSPM (R 4.2.0)
+ pkgconfig          2.0.3       2019-09-22 [1] RSPM (R 4.2.0)
+ plyr               1.8.8       2022-11-11 [1] RSPM (R 4.2.0)
+ png                0.1-8       2022-11-29 [1] RSPM (R 4.2.0)
+ processx           3.8.0       2022-10-26 [1] RSPM (R 4.2.0)
+ promises           1.2.0.1     2021-02-11 [1] RSPM (R 4.2.0)
+ ps                 1.7.4       2023-04-02 [1] RSPM (R 4.2.0)
+ purrr            * 1.0.1       2023-01-10 [1] RSPM (R 4.2.0)
+ R6                 2.5.1       2021-08-19 [1] RSPM (R 4.2.0)
+ ragg               1.2.5       2023-01-12 [1] RSPM (R 4.2.0)
+ RColorBrewer     * 1.1-3       2022-04-03 [1] RSPM (R 4.2.0)
+ Rcpp               1.0.10      2023-01-22 [1] RSPM (R 4.2.0)
+ readr            * 2.1.4       2023-02-10 [1] RSPM (R 4.2.0)
+ rematch2           2.1.2       2020-05-01 [1] RSPM (R 4.2.0)
+ repr               1.1.6       2023-01-26 [1] RSPM (R 4.2.0)
+ reshape2           1.4.4       2020-04-09 [1] RSPM (R 4.2.0)
+ reticulate       * 1.28-9000   2023-04-30 [1] Github (rstudio/reticulate@442c49f)
+ rlang              1.1.0       2023-03-14 [1] RSPM (R 4.2.0)
+ rmarkdown          2.21        2023-03-26 [1] RSPM (R 4.2.0)
+ rprojroot          2.0.3       2022-04-02 [1] RSPM (R 4.2.0)
+ rstudioapi         0.14        2022-08-22 [1] RSPM (R 4.2.0)
+ sandwich           3.0-2       2022-06-15 [1] RSPM (R 4.2.0)
+ scales             1.2.1       2022-08-20 [1] RSPM (R 4.2.0)
+ sceasy           * 0.0.7       2023-04-30 [1] Github (cellgeni/sceasy@0cfc0e3)
+ sessioninfo        1.2.2       2021-12-06 [1] RSPM (R 4.2.0)
+ skimr            * 2.1.5       2023-04-30 [1] Github (ropensci/skimr@d5126aa)
+ statsExpressions   1.5.0       2023-02-19 [1] RSPM (R 4.2.0)
+ stringi            1.7.12      2023-01-11 [1] RSPM (R 4.2.0)
+ stringr          * 1.5.0       2022-12-02 [1] RSPM (R 4.2.0)
+ survival           3.5-5       2023-03-12 [1] RSPM (R 4.2.0)
+ systemfonts        1.0.4       2022-02-11 [1] RSPM (R 4.2.0)
+ textshaping        0.3.6       2021-10-13 [1] RSPM (R 4.2.0)
+ TH.data            1.1-1       2022-04-26 [1] RSPM (R 4.2.0)
+ tibble           * 3.2.1       2023-03-20 [1] RSPM (R 4.2.0)
+ tidyr            * 1.3.0       2023-01-24 [1] RSPM (R 4.2.0)
+ tidyselect         1.2.0       2022-10-10 [1] RSPM (R 4.2.0)
+ tidyverse        * 2.0.0.9000  2023-04-30 [1] Github (tidyverse/tidyverse@8ec2e1f)
+ timechange         0.2.0       2023-01-11 [1] RSPM (R 4.2.0)
+ tzdb               0.3.0       2022-03-28 [1] RSPM (R 4.2.0)
+ utf8               1.2.3       2023-01-31 [1] RSPM (R 4.2.0)
+ vctrs              0.6.2       2023-04-19 [1] RSPM (R 4.2.2)
+ vroom              1.6.1       2023-01-22 [1] RSPM (R 4.2.0)
+ whisker            0.4.1       2022-12-05 [1] RSPM (R 4.2.0)
+ withr              2.5.0       2022-03-03 [1] RSPM (R 4.2.0)
+ workflowr        * 1.7.0       2021-12-21 [1] RSPM (R 4.2.0)
+ xfun               0.39        2023-04-20 [1] RSPM (R 4.2.2)
+ xtable             1.8-4       2019-04-21 [1] RSPM (R 4.2.0)
+ yaml               2.3.7       2023-01-23 [1] RSPM (R 4.2.0)
+ zeallot            0.1.0       2018-01-28 [1] RSPM (R 4.2.0)
+ zoo                1.8-12      2023-04-13 [1] RSPM (R 4.2.2)
+
+ [1] /opt/R/4.2.2/lib/R/library
+
+─ Python configuration ───────────────────────────────────────────────────────
+ python:         /opt/python/3.8.8/bin/python
+ libpython:      /opt/python/3.8.8/lib/libpython3.8.so
+ pythonhome:     /opt/python/3.8.8:/opt/python/3.8.8
+ version:        3.8.8 | packaged by conda-forge | (default, Feb 20 2021, 16:22:27)  [GCC 9.3.0]
+ numpy:          /opt/python/3.8.8/lib/python3.8/site-packages/numpy
+ numpy_version:  1.23.5
+ scanpy:         /opt/python/3.8.8/lib/python3.8/site-packages/scanpy
+ 
+ NOTE: Python version was forced by RETICULATE_PYTHON
+
+──────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
